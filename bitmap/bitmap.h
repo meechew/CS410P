@@ -33,26 +33,26 @@ private:
    * @throws failure if we failed to write.
    */
   friend std::ostream& operator<<(std::ostream& in, const Bitmap& b);
-  char type[2];
-  uint32_t fSize;
-  uint32_t offset;
-  uint32_t hSize;
-  uint32_t iWide;
-  uint32_t iHigh;
-  char plan[2];
-  char bits[2];
-  uint32_t compr;
-  uint32_t iSize;
-  int32_t XpPm;
-  int32_t YpPm;
-  uint32_t color;
-  uint32_t iColr;
+  char type[2];                             // File type. must =BM
+  uint32_t fSize;                           // Size of the whole file.
+  uint32_t grbge;                           // Garbage. reserved for special use.
+  uint32_t offst;                           // Offset to start of the file.
+  uint32_t hSize;                           // Size of the header
+  uint32_t iWide;                           // Width of image
+  uint32_t iHigh;                           // Hight of image
+  char plan[2];                             // Color Planes
+  char bits[2];                             // Color depth
+  uint32_t compr;                           // Compression method: 0=24, 3=32
+  uint32_t iSize;                           // Image raw data size.
+  int32_t XpPm;                             // Pixels per meter on the X-axis
+  int32_t YpPm;                             // Pixels per meter on the Y-axis
+  uint32_t color;                           // Color pallet
+  uint32_t iColr;                           // Extra color pallet
 
 
 public:
   Bitmap();
-  istream& operator>>(Bitmap& b);
-  ostream& operator<<(const Bitmap& b);
+
 };
 
 /**
