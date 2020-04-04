@@ -1,37 +1,58 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
 
 class Bitmap
 {
 private:
 
-    /**
-     * Read in an image.
-     * reads a bitmap in from the stream
-     *
-     * @param in the stream to read from.
-     * @param b the bitmap that we are creating.
-     *
-     * @return the stream after we've read in the image.
-     *
-     * @throws BitmapException if it's an invalid bitmap.
-     * @throws bad_alloc exception if we failed to allocate memory.
-     */
-    friend std::istream& operator>>(std::istream& in, Bitmap& b);
+  /**
+   * Read in an image.
+   * reads a bitmap in from the stream
+   *
+   * @param in the stream to read from.
+   * @param b the bitmap that we are creating.
+   *
+   * @return the stream after we've read in the image.
+   *
+   * @throws BitmapException if it's an invalid bitmap.
+   * @throws bad_alloc exception if we failed to allocate memory.
+   */
+  friend std::istream& operator>>(std::istream& in, Bitmap& b);
 
-    /**
-     * Write the binary representation of the image to the stream.
-     *
-     * @param out the stream to write to.
-     * @param b the bitmap that we are writing.
-     *
-     * @return the stream after we've finished writting.
-     *
-     * @throws failure if we failed to write.
-     */
-    friend std::ostream& operator<<(std::ostream& in, const Bitmap& b);
+  /**
+   * Write the binary representation of the image to the stream.
+   *
+   * @param out the stream to write to.
+   * @param b the bitmap that we are writing.
+   *
+   * @return the stream after we've finished writting.
+   *
+   * @throws failure if we failed to write.
+   */
+  friend std::ostream& operator<<(std::ostream& in, const Bitmap& b);
+  char type[2];
+  uint32_t fSize;
+  uint32_t offset;
+  uint32_t hSize;
+  uint32_t iWide;
+  uint32_t iHigh;
+  char plan[2];
+  char bits[2];
+  uint32_t compr;
+  uint32_t iSize;
+  int32_t XpPm;
+  int32_t YpPm;
+  uint32_t color;
+  uint32_t iColr;
 
 
 public:
-    Bitmap();
+  Bitmap();
+  istream& operator>>(Bitmap& b);
+  ostream& operator<<(const Bitmap& b);
 };
 
 /**
@@ -111,23 +132,23 @@ void scaleDown(Bitmap& b);
  */
 class BitmapException : public std::exception
 {
-    // the message to print out
-    std::string _message;
+  // the message to print out
+  std::string _message;
 
-    // position in the bitmap file (in bytes) where the error occured.
-    uint32_t _position;
+  // position in the bitmap file (in bytes) where the error occured.
+  uint32_t _position;
 
 public:
-    BitmapException() = delete;
+  BitmapException() = delete;
 
-    BitmapException(const std::string& message, uint32_t position);
-    BitmapException(std::string&& message, uint32_t position);
+  BitmapException(const std::string& message, uint32_t position);
+  BitmapException(std::string&& message, uint32_t position);
 
-    /**
-     * prints out the exception in the form:
-     *
-     * "Error in bitmap at position 0xposition :
-     * message"
-     */
-    void print_exception();
+  /**
+   * prints out the exception in the form:
+   *
+   * "Error in bitmap at position 0xposition :
+   * message"
+   */
+  void print_exception();
 };
