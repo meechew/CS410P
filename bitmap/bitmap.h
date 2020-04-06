@@ -4,6 +4,14 @@
 
 using namespace std;
 
+
+struct Pixel{
+  char A;
+  char B;
+  char G;
+  char R;
+};
+
 class Bitmap
 {
 private:
@@ -33,22 +41,30 @@ private:
    * @throws failure if we failed to write.
    */
   friend std::ostream& operator<<(std::ostream& in, const Bitmap& b);
-  char type[2];                             // File type. must =BM
-  uint32_t fSize;                           // Size of the whole file.
-  uint32_t grbge;                           // Garbage. reserved for special use.
-  uint32_t offst;                           // Offset to start of the file.
-  uint32_t hSize;                           // Size of the header
-  uint32_t iWide;                           // Width of image
-  uint32_t iHigh;                           // Hight of image
-  char plan[2];                             // Color Planes
-  char bits[2];                             // Color depth
-  uint32_t compr;                           // Compression method: 0=24, 3=32
-  uint32_t iSize;                           // Image raw data size.
-  int32_t XpPm;                             // Pixels per meter on the X-axis
-  int32_t YpPm;                             // Pixels per meter on the Y-axis
-  uint32_t color;                           // Color pallet
-  uint32_t iColr;                           // Extra color pallet
 
+  struct FileHeader{
+    char type[2];                             // File type. must =BM
+    uint32_t fSize;                           // Size of the whole file
+    uint32_t grbge;                           // Garbage. reserved for special use
+    uint32_t offst;                           // Offset to start of the file
+  };
+  struct ImageHeader{
+    uint32_t hSize;                           // Size of the header
+    uint32_t iWide;                           // Width of image
+    uint32_t iHigh;                           // Hight of image
+    char plan[2];                             // Color Planes
+    char bits[2];                             // Color depth
+    uint32_t compr;                           // Compression method: 0=24, 3=32
+    uint32_t iSize;                           // Image raw data size
+    int32_t XpPm;                             // Pixels per meter on the X-axis
+    int32_t YpPm;                             // Pixels per meter on the Y-axis
+    uint32_t iColr;                           // Color pallet
+    uint32_t eColr;                           // Extra color pallet
+  };
+  FileHeader fHead;                           // BMP file format header
+  ImageHeader iHead;                          // Image data header
+  Pixel* raw;                                 // Raw image data.
+  Pixel** map;                                 // imaged data mapped
 
 public:
   Bitmap();
