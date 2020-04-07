@@ -55,24 +55,25 @@ private:
     uint32_t iColr;                           // Color pallet
     uint32_t eColr;                           // Extra color pallet
   };
-  struct ColorWheel{
-    uint32_t Rmask;
-    uint32_t Gmask;
-    uint32_t Bmask;
-    uint32_t Amask;
-  };
   struct Pixel{
     char A;
     char B;
     char G;
     char R;
   };
+  struct ColorWheel{
+    uint32_t Rmask;
+    uint32_t Gmask;
+    uint32_t Bmask;
+    uint32_t Amask;
+  };
   struct
   FileHeader fHead{};                           // BMP file format header
   ImageHeader iHead{};                          // Image data header
-  Pixel* raw{};                                 // Raw image data.
-  Pixel** map{};                                 // imaged data mapped
-  int Messure();
+  Pixel* raw{};                                 // Raw image data
+  Pixel** map{};                                // Imaged data mapped
+  ColorWheel mask{};                            // Bit mask data
+  void Measure();
 public:
   Bitmap();
 

@@ -61,13 +61,17 @@ std::ostream &operator<<(std::ostream &in, const Bitmap &b) {
   return in;
 }
 
-int Bitmap::Messure() {
-  assert(iHead.iWide * iHead.iHigh != (sizeof raw)/4) /* The Number of pixels must match the number pi
-  if (!iHead.compr)
-    iHead.iSize = size(raw);
+void Bitmap::Measure() {
+  assert(iHead.iWide * iHead.iHigh != (sizeof raw)/4); // The Number of pixels must match the Width * Height
+  if (!iHead.compr) {
+    iHead.iSize = ((sizeof raw)/4) * 3;
+  }
+  else iHead.iSize = sizeof raw;
   iHead.hSize = sizeof iHead;
-
-  return 0;
+  fHead.offst = sizeof fHead + iHead.hSize;
+  if (iHead.compr)
+    fHead.offst += sizeof mask;
+  fHead.fSize = fHead.offst + iHead.iSize;
 }
 
 
