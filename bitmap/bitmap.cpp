@@ -5,7 +5,6 @@
 #include <assert.h>
 #include "bitmap.h"
 
-Bitmap::Bitmap() = default;
 
 std::istream &operator>>(std::istream &in, Bitmap &b) {
 
@@ -58,7 +57,31 @@ std::ostream &operator<<(std::ostream &in, const Bitmap &b) {
   in << b.iHead.hSize << b.iHead.iWide << b.iHead.iHigh << b.iHead.plan
      << b.iHead.bits << b.iHead.compr << b.iHead.iSize << b.iHead.XpPm
      << b.iHead.YpPm << b.iHead.iColr << b.iHead.eColr;
+  if (b.iHead.compr){
+    in << b.mask.Rmask << b.mask.Gmask << b.mask.Bmask << b.mask.Amask;
+  }
   return in;
+}
+
+Bitmap::Bitmap() = default;
+
+void grayscale(Bitmap &b) {
+  b.grayscale_wrap();
+}
+
+void Bitmap::grayscale_wrap() {
+  grayscale_piv();
+}
+
+void Bitmap::grayscale_piv() {
+  uint32_t len = iHead.iWide * iHead.iHigh;
+  int pix;
+  for(int k = 0; k < len; ++k){
+    pix = (raw[k].B + raw[k].G + raw[k].R) / 3;
+    raw[k].B = (char)pix;
+    raw[k].G = (char)pix;
+    raw[k].R = (char)pix;
+  }
 }
 
 void Bitmap::Measure() {
@@ -73,5 +96,6 @@ void Bitmap::Measure() {
     fHead.offst += sizeof mask;
   fHead.fSize = fHead.offst + iHead.iSize;
 }
+
 
 

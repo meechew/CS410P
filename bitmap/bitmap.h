@@ -74,8 +74,10 @@ private:
   Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
   void Measure();
+  void grayscale_piv();
 public:
   Bitmap();
+  void grayscale_wrap();
 
 };
 

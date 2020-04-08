@@ -45,13 +45,13 @@ int main(int argc, char** argv)
     }
   catch(BitmapException& e)
     {
-      e.print_exception();
+      //e.print_exception();
       return 0;
     }
 
   if(flag == "-c"s)
     {
-      cellShade(image);
+      //cellShade(image);
     }
   if(flag == "-g"s)
     {
@@ -59,47 +59,47 @@ int main(int argc, char** argv)
     }
   if(flag == "-p"s)
     {
-      pixelate(image);
+      //pixelate(image);
     }
   if(flag == "-b"s)
     {
-      blur(image);
+      //blur(image);
     }
   if(flag == "-r90"s)
     {
-      rot90(image);
+      //rot90(image);
     }
   if(flag == "-r180"s)
     {
-      rot180(image);
+      //rot180(image);
     }
   if(flag == "-r270"s)
     {
-      rot270(image);
+      //rot270(image);
     }
   if(flag == "-v"s)
     {
-      flipv(image);
+      //flipv(image);
     }
   if(flag == "-h"s)
     {
-      fliph(image);
+      //fliph(image);
     }
   if(flag == "-d1"s)
     {
-      flipd1(image);
+      //flipd1(image);
     }
   if(flag == "-d2"s)
     {
-      flipd2(image);
+      //flipd2(image);
     }
   if(flag == "-grow"s)
     {
-      scaleUp(image);
+      //scaleUp(image);
     }
   if(flag == "-shrink"s)
     {
-      scaleDown(image);
+      //scaleDown(image);
     }
 
   out.open(outfile, ios::binary);
