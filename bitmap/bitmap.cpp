@@ -46,7 +46,7 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
     }
   }
   b.map[b.iHead.iWide][b.iHead.iHigh];
-  *b.map = b.raw;
+  b.map = &b.raw;
   return in;
 }
 
@@ -81,6 +81,7 @@ void Bitmap::grayscale_piv() {
     raw[k].B = (char)pix;
     raw[k].G = (char)pix;
     raw[k].R = (char)pix;
+    cout << "made gray";
   }
 }
 
