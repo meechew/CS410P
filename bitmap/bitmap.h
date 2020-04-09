@@ -34,7 +34,7 @@ private:
    *
    * @throws failure if we failed to write.
    */
-  friend std::ostream& operator<<(std::ostream& in, const Bitmap& b);
+  friend std::ostream& operator<<(std::ostream& out, const Bitmap& b);
 
   struct FileHeader{
     char type[2];                             // File type. must =BM
@@ -56,10 +56,10 @@ private:
     uint32_t eColr;                           // Extra color pallet
   };
   struct Pixel{
-    char A;
-    char B;
-    char G;
-    char R;
+    unsigned char A;
+    unsigned char B;
+    unsigned char G;
+    unsigned char R;
   };
   struct ColorWheel{
     uint32_t Rmask;
@@ -74,11 +74,13 @@ private:
   Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
   void Measure();
-  void grayscale_piv();
+  void PixelateBlock(int col, int row, Pixel **tmp);
 public:
   Bitmap();
-  void grayscale_wrap();
-
+  ~Bitmap();
+  void cellShade();
+  void grayscale();
+  void pixelate();
 };
 
 /**

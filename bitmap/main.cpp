@@ -51,15 +51,15 @@ int main(int argc, char** argv)
 
   if(flag == "-c"s)
     {
-      //cellShade(image);
+      image.cellShade();
     }
   if(flag == "-g"s)
     {
-      grayscale(image);
+      image.grayscale();
     }
   if(flag == "-p"s)
     {
-      //pixelate(image);
+      image.pixelate();
     }
   if(flag == "-b"s)
     {
