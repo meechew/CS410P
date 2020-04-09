@@ -74,7 +74,7 @@ private:
   Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
   void Measure();
-  void PixelateBlock(int col, int row, Pixel **tmp);
+  void PixelateBlock(int row, int col, Pixel **tmp);
 public:
   Bitmap();
   ~Bitmap();
