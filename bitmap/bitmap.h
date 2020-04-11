@@ -45,7 +45,7 @@ private:
   struct ImageHeader{
     uint32_t hSize;                           // Size of the header
     uint32_t iWide;                           // Width of image
-    uint32_t iHigh;                           // Hight of image
+    uint32_t iHigh;                           // Height of image
     char plan[2];                             // Color Planes
     char bits[2];                             // Color depth
     uint32_t compr;                           // Compression method: 0=24, 3=32
@@ -61,6 +61,7 @@ private:
     unsigned char G;
     unsigned char R;
   };
+
   struct ColorWheel{
     uint32_t Rmask;
     uint32_t Gmask;
@@ -81,6 +82,9 @@ public:
   void cellShade();
   void grayscale();
   void pixelate();
+  void blur();
+  void rot90();
+  void rot180();
 };
 
 /**

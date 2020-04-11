@@ -63,15 +63,15 @@ int main(int argc, char** argv)
     }
   if(flag == "-b"s)
     {
-      //blur(image);
+      image.blur();
     }
   if(flag == "-r90"s)
     {
-      //rot90(image);
+      image.rot90();
     }
   if(flag == "-r180"s)
     {
-      //rot180(image);
+      image.rot180();
     }
   if(flag == "-r270"s)
     {

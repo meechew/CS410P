@@ -168,6 +168,45 @@ void Bitmap::PixelateBlock(int row, int col, Pixel **tmp) {
     }
 }
 
+
+void Bitmap::blur() {
+
+}
+
+void Bitmap::rot90() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel **tmpm = new Pixel*[col];
+  for(int c = 0; c < col; ++c)
+    tmpm[c] = &tmpr[c * row];
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c)
+      tmpm[c][row-r] = map[r][c];
+  delete(map);
+  delete(raw);
+  map = tmpm;
+  raw = tmpr;
+  iHead.iWide = row;
+  iHead.iHigh = col;
+}
+
+void Bitmap::rot180(){
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel **tmpm = new Pixel*[row];
+  for(int c = 0; c < col; ++c )
+    tmpm[c] = &tmpr[c * col];
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c)
+      tmpm[row-r][col-c] = map[r][c];
+  delete(map);
+  delete(raw);
+  map = tmpm;
+  raw = tmpr;
+}
+
 void Bitmap::Measure() {
   Bitmap tmp;
   if (!iHead.compr) {
@@ -183,10 +222,6 @@ void Bitmap::Measure() {
   fHead.fSize = fHead.offst + iHead.iSize;
 }
 
-
-
-
-
-
-
 #pragma clang diagnostic pop
+
+
