@@ -131,8 +131,8 @@ void Bitmap::pixelate() {
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
   Pixel *tmap[row];
-  for(int c = 0; c < col; ++c )
-    tmap[c] = &tmpr[c * col];
+  for(int r = 0; r < row; ++r )
+    tmap[r] = &tmpr[r * col];
   for(int r = 0; r < row; r += 16)
     for(int c = 0; c < col; c += 16)
       PixelateBlock(r, c, tmap);
@@ -142,9 +142,9 @@ void Bitmap::pixelate() {
 
 void Bitmap::PixelateBlock(int row, int col, Pixel **tmp) {
   int Rpool = 0, Gpool = 0, Bpool = 0;
-  Pixel *tmap[row];
-  for(int c = 0; c < col; ++c )
-    tmap[c] = &raw[c * col];
+  Pixel *tmap[iHead.iHigh];
+  for(int c = 0; c < iHead.iHigh; ++c )
+    tmap[c] = &raw[c * iHead.iWide];
   for(int r = row; r < row + 16 && r < iHead.iHigh; ++r)
    for(int c = col; c < col + 16 && c < iHead.iWide; ++c){
      Rpool += tmap[r][c].R;
@@ -238,8 +238,8 @@ void Bitmap::scaleUp() {
   boarders.iHead.iWide = col;
   boarders.iHead.iHigh = row;
   int mk = 0;
-  for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c) {
+  for(int r = 0; r < iHead.iHigh; ++r)
+    for(int c = 0; c < iHead.iWide; ++c) {
       FillBlock(r * 2, c * 2, tmpm, 2, raw[mk], boarders);
       mk++;
     }
