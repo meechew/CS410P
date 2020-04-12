@@ -270,7 +270,6 @@ void Bitmap::scaleDown() {
 }
 
 void Bitmap::Measure() {
-  Bitmap tmp;
   if (!iHead.compr) {
     iHead.iSize = ((iHead.iWide * iHead.iHigh) / 4) * 3 * sizeof(Pixel);
   }
