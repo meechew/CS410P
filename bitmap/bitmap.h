@@ -75,7 +75,7 @@ private:
   FileHeader fHead{};                           // BMP file format header
   ImageHeader iHead{};                          // Image data header
   Pixel* raw{};                                 // Raw image data
-  Pixel** map{};                                // Imaged data mapped
+  //Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
 
   void Measure();

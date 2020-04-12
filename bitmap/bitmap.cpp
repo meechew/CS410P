@@ -31,26 +31,21 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
   if (!b.iHead.compr) {
     pixels = b.iHead.iSize / 3; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
     b.raw = new Bitmap::Pixel[pixels];
-    for (int k = 0; k < pixels; ++k) {
-      b.raw[k].R = in.get();
-      b.raw[k].G = in.get();
-      b.raw[k].B = in.get();
+    for (int r = 0; r < pixels; ++r) {
+      b.raw[r].R = in.get();
+      b.raw[r].G = in.get();
+      b.raw[r].B = in.get();
     }
   } else {
     pixels = b.iHead.iSize / 4; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
     b.raw = new Bitmap::Pixel[pixels];
-    for (int k = 0; k < pixels; ++k) {
-      b.raw[k].R = in.get();
-      b.raw[k].G = in.get();
-      b.raw[k].B = in.get();
-      b.raw[k].A = in.get();
+    for (int r = 0; r < pixels; ++r) {
+      b.raw[r].R = in.get();
+      b.raw[r].G = in.get();
+      b.raw[r].B = in.get();
+      b.raw[r].A = in.get();
     }
   }
-  b.map = new Bitmap::Pixel*[b.iHead.iHigh];
-  for (int R = 0; R < b.iHead.iWide; ++R) {
-    b.map[R] = &b.raw[R * b.iHead.iWide];
-  }
-  *b.map = b.raw;
   return in;
 }
 
@@ -135,25 +130,26 @@ void Bitmap::pixelate() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
-  Pixel **tmpm = new Pixel*[row];
+  Pixel *tmap[row];
   for(int c = 0; c < col; ++c )
-    tmpm[c] = &tmpr[c * col];
+    tmap[c] = &tmpr[c * col];
   for(int r = 0; r < row; r += 16)
     for(int c = 0; c < col; c += 16)
-      PixelateBlock(r, c, tmpm);
-  delete(map);
+      PixelateBlock(r, c, tmap);
   delete(raw);
-  map = tmpm;
   raw = tmpr;
 }
 
 void Bitmap::PixelateBlock(int row, int col, Pixel **tmp) {
   int Rpool = 0, Gpool = 0, Bpool = 0;
+  Pixel *tmap[row];
+  for(int c = 0; c < col; ++c )
+    tmap[c] = &raw[c * col];
   for(int r = row; r < row + 16 && r < iHead.iHigh; ++r)
    for(int c = col; c < col + 16 && c < iHead.iWide; ++c){
-     Rpool += map[r][c].R;
-     Gpool += map[r][c].G;
-     Bpool += map[r][c].B;
+     Rpool += tmap[r][c].R;
+     Gpool += tmap[r][c].G;
+     Bpool += tmap[r][c].B;
    }
   Rpool /= 256;
   Gpool /= 256;
@@ -180,15 +176,16 @@ void Bitmap::rot90() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
-  Pixel **tmpm = new Pixel*[col];
+  Pixel *tmpm[col];
   for(int c = 0; c < col; ++c)
     tmpm[c] = &tmpr[c * row];
+  int mk = 0;
   for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c)
-      tmpm[c][row - r] = map[r][c];
-  delete(map);
+    for(int c = 0; c < col; ++c) {
+      tmpm[c][row - r] = raw[mk];
+      ++mk;
+    }
   delete(raw);
-  map = tmpm;
   raw = tmpr;
   iHead.iWide = row;
   iHead.iHigh = col;
@@ -201,12 +198,13 @@ void Bitmap::rot180() {
   Pixel **tmpm = new Pixel*[row];
   for(int c = 0; c < col; ++c )
     tmpm[c] = &tmpr[c * col];
+  int mk = 0;
   for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c)
-      tmpm[row - r][col - c] = map[r][c];
-  delete(map);
+    for(int c = 0; c < col; ++c) {
+      tmpm[row - r][col - c] = raw[mk];
+      ++mk;
+    }
   delete(raw);
-  map = tmpm;
   raw = tmpr;
 }
 
@@ -217,12 +215,13 @@ void Bitmap::rot270() {
   Pixel **tmpm = new Pixel*[col];
   for(int c = 0; c < col; ++c)
     tmpm[c] = &tmpr[c * row];
+  int mk = 0;
   for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c)
-      tmpm[col - c - 1][row - r] = map[r][c];
-  delete(map);
+    for(int c = 0; c < col; ++c) {
+      tmpm[col - c - 1][row - r] = raw[mk];
+      mk++;
+    }
   delete(raw);
-  map = tmpm;
   raw = tmpr;
   iHead.iWide = row;
   iHead.iHigh = col;
@@ -238,12 +237,13 @@ void Bitmap::scaleUp() {
   Bitmap boarders;
   boarders.iHead.iWide = col;
   boarders.iHead.iHigh = row;
+  int mk = 0;
   for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c)
-      FillBlock(r * 2, c * 2, tmpm, 2, map[r][c], boarders);
-  delete(map);
+    for(int c = 0; c < col; ++c) {
+      FillBlock(r * 2, c * 2, tmpm, 2, raw[mk], boarders);
+      mk++;
+    }
   delete(raw);
-  map = tmpm;
   raw = tmpr;
   iHead.iWide = col;
   iHead.iHigh = row;
@@ -257,12 +257,22 @@ void Bitmap::scaleDown() {
   Pixel **tmpm = new Pixel*[row];
   for(int c = 0; c < col; ++c )
     tmpm[c] = &tmpr[c * col];
-  for(int r = 0; r < row; ++r)
-    for(int c = 0; c < col; ++c)
-      tmpm[r][c] = map[r *2][c * 2];
-  delete(map);
+  int mk = 0;
+  for(int r = 0; r < row; ++r) {
+    if(r%2 != 0) {
+      mk += col;
+      continue;
+    }
+    for(int c = 0; c < col; ++c){
+      if(c%2 != 0) {
+        mk++;
+        continue;
+      }
+      tmpm[r][c] = raw[mk];
+      mk++;
+    }
+  }
   delete(raw);
-  map = tmpm;
   raw = tmpr;
   iHead.iWide = col;
   iHead.iHigh = row;
