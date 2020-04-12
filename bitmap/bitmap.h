@@ -60,6 +60,9 @@ private:
     unsigned char B;
     unsigned char G;
     unsigned char R;
+    Pixel();
+    Pixel(char nR, char nG, char nB);
+    Pixel(char nR, char nG, char nB, char nA);
   };
 
   struct ColorWheel{
@@ -74,8 +77,10 @@ private:
   Pixel* raw{};                                 // Raw image data
   Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
+
   void Measure();
   void PixelateBlock(int row, int col, Pixel **tmp);
+  void FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap &boarders);
 public:
   Bitmap();
   ~Bitmap();
@@ -85,6 +90,11 @@ public:
   void blur();
   void rot90();
   void rot180();
+  void rot270();
+  void scaleUp();
+  void scaleDown();
+
+
 };
 
 /**

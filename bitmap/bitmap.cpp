@@ -1,4 +1,5 @@
 #pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-use-auto"
 #pragma ide diagnostic ignored "hicpp-use-auto"
 // Created by CBunt on 1 APR 2020.
 //
@@ -98,8 +99,6 @@ std::ostream &operator<<(std::ostream &out, const Bitmap &b) {
   return out;
 }
 
-Bitmap::Bitmap() = default;
-Bitmap::~Bitmap() = default;
 
 void Bitmap::cellShade() {
   int len = iHead.iWide * iHead.iHigh; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
@@ -122,7 +121,6 @@ void Bitmap::cellShade() {
   }
 }
 void Bitmap::grayscale() {
-
   int len = iHead.iWide * iHead.iHigh; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
   int pix;
   for(int k = 0; k < len; ++k){
@@ -160,14 +158,19 @@ void Bitmap::PixelateBlock(int row, int col, Pixel **tmp) {
   Rpool /= 256;
   Gpool /= 256;
   Bpool /= 256;
+  Pixel pool((char)Rpool, (char)Gpool, (char)Bpool);
   for(int r = row; r < row + 16 && r < iHead.iHigh; ++r)
     for(int c = col; c < col + 16 && c < iHead.iWide; ++c){
-      tmp[r][c].R = (char)Rpool;
-      tmp[r][c].G = (char)Gpool;
-      tmp[r][c].B = (char)Bpool;
+      FillBlock(r, c, tmp, 16, pool, *this);
     }
 }
 
+void Bitmap::FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap &boarders) {
+  for(int r = row; r < row + met && r < boarders.iHead.iHigh; ++r)
+    for(int c = col; c < col + met && c < boarders.iHead.iWide; ++c){
+      tmp[r][c] = p;
+    }
+}
 
 void Bitmap::blur() {
 
@@ -182,7 +185,7 @@ void Bitmap::rot90() {
     tmpm[c] = &tmpr[c * row];
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c)
-      tmpm[c][row-r] = map[r][c];
+      tmpm[c][row - r] = map[r][c];
   delete(map);
   delete(raw);
   map = tmpm;
@@ -191,7 +194,7 @@ void Bitmap::rot90() {
   iHead.iHigh = col;
 }
 
-void Bitmap::rot180(){
+void Bitmap::rot180() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -200,11 +203,70 @@ void Bitmap::rot180(){
     tmpm[c] = &tmpr[c * col];
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c)
-      tmpm[row-r][col-c] = map[r][c];
+      tmpm[row - r][col - c] = map[r][c];
   delete(map);
   delete(raw);
   map = tmpm;
   raw = tmpr;
+}
+
+void Bitmap::rot270() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel **tmpm = new Pixel*[col];
+  for(int c = 0; c < col; ++c)
+    tmpm[c] = &tmpr[c * row];
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c)
+      tmpm[col - c - 1][row - r] = map[r][c];
+  delete(map);
+  delete(raw);
+  map = tmpm;
+  raw = tmpr;
+  iHead.iWide = row;
+  iHead.iHigh = col;
+}
+
+void Bitmap::scaleUp() {
+  int col = iHead.iWide * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+  int row = iHead.iHigh * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel **tmpm = new Pixel*[row];
+  for(int c = 0; c < col; ++c )
+    tmpm[c] = &tmpr[c * col];
+  Bitmap boarders;
+  boarders.iHead.iWide = col;
+  boarders.iHead.iHigh = row;
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c)
+      FillBlock(r * 2, c * 2, tmpm, 2, map[r][c], boarders);
+  delete(map);
+  delete(raw);
+  map = tmpm;
+  raw = tmpr;
+  iHead.iWide = col;
+  iHead.iHigh = row;
+  Measure();
+}
+
+void Bitmap::scaleDown() {
+  int col = iHead.iWide / 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+  int row = iHead.iHigh / 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel **tmpm = new Pixel*[row];
+  for(int c = 0; c < col; ++c )
+    tmpm[c] = &tmpr[c * col];
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c)
+      tmpm[r][c] = map[r *2][c * 2];
+  delete(map);
+  delete(raw);
+  map = tmpm;
+  raw = tmpr;
+  iHead.iWide = col;
+  iHead.iHigh = row;
+  Measure();
 }
 
 void Bitmap::Measure() {
@@ -219,8 +281,33 @@ void Bitmap::Measure() {
   fHead.offst = sizeof fHead + iHead.hSize;
   if (iHead.compr)
     fHead.offst += sizeof mask;
+  fHead.offst -= 2;
   fHead.fSize = fHead.offst + iHead.iSize;
 }
+
+Bitmap::Bitmap() = default;
+Bitmap::~Bitmap() = default;
+Bitmap::Pixel::Pixel() {
+  R = 0;
+  G = 0;
+  B = 0;
+  A = 0;
+}
+Bitmap::Pixel::Pixel(char nR, char nG, char nB) {
+  R = nR;
+  G = nG;
+  B = nB;
+  A = 0;
+}
+
+Bitmap::Pixel::Pixel(char nR, char nG, char nB, char nA) {
+  R = nR;
+  G = nG;
+  B = nB;
+  A = nA;
+}
+
+
 
 #pragma clang diagnostic pop
 

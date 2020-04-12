@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     }
   if(flag == "-r270"s)
     {
-      //rot270(image);
+      image.rot270();
     }
   if(flag == "-v"s)
     {
@@ -95,11 +95,11 @@ int main(int argc, char** argv)
     }
   if(flag == "-grow"s)
     {
-      //scaleUp(image);
+      image.scaleUp();
     }
   if(flag == "-shrink"s)
     {
-      //scaleDown(image);
+      image.scaleDown();
     }
 
   out.open(outfile, ios::binary);
