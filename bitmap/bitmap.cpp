@@ -201,7 +201,7 @@ void Bitmap::rot180() {
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
-      tmpm[row - r][col - c] = raw[mk];
+      tmpm[row - r - 1][col - c] = raw[mk];
       ++mk;
     }
   delete(raw);
@@ -232,7 +232,7 @@ void Bitmap::flipv() {
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
   Pixel *tmpm[row];
-  for(int c = 0; c < col; ++c )
+  for(int c = 0; c < row; ++c )
     tmpm[c] = &tmpr[c * col];
   int mk = 0;
   for(int r = 0; r < row; ++r)
@@ -261,6 +261,7 @@ void Bitmap::fliph() {
   raw = tmpr;
 }
 
+
 void Bitmap::flipd1() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
@@ -271,7 +272,7 @@ void Bitmap::flipd1() {
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
-      tmpm[c][row - r] = raw[mk];
+      tmpm[col - c - 1][row - r] = raw[mk];
       ++mk;
     }
   delete(raw);
@@ -290,15 +291,14 @@ void Bitmap::flipd2() {
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
-      tmpm[col - c][row - r] = raw[mk];
+      tmpm[c][r] = raw[mk];
       ++mk;
     }
-  //delete(raw);
+  delete(raw);
   raw = tmpr;
   iHead.iWide = row;
   iHead.iHigh = col;
 }
-
 
 void Bitmap::scaleUp() {
   int col = iHead.iWide * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
