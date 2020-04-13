@@ -182,8 +182,8 @@ void Bitmap::rot90() {
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
-      tmpm[c][row - r] = raw[mk];
-      ++mk;
+      tmpm[col - c - 1][row - r] = raw[mk];
+      mk++;
     }
   delete(raw);
   raw = tmpr;
@@ -195,9 +195,9 @@ void Bitmap::rot180() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
-  Pixel **tmpm = new Pixel*[row];
-  for(int c = 0; c < col; ++c )
-    tmpm[c] = &tmpr[c * col];
+  Pixel *tmpm[row];
+  for(int r = 0; r < row; ++r )
+    tmpm[r] = &tmpr[r * col];
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
@@ -212,20 +212,93 @@ void Bitmap::rot270() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
-  Pixel **tmpm = new Pixel*[col];
+  Pixel *tmpm[col];
   for(int c = 0; c < col; ++c)
     tmpm[c] = &tmpr[c * row];
   int mk = 0;
   for(int r = 0; r < row; ++r)
     for(int c = 0; c < col; ++c) {
-      tmpm[col - c - 1][row - r] = raw[mk];
-      mk++;
+      tmpm[c][row - r] = raw[mk];
+      ++mk;
     }
   delete(raw);
   raw = tmpr;
   iHead.iWide = row;
   iHead.iHigh = col;
 }
+
+void Bitmap::flipv() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel *tmpm[row];
+  for(int c = 0; c < col; ++c )
+    tmpm[c] = &tmpr[c * col];
+  int mk = 0;
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c) {
+      tmpm[r][col - c] = raw[mk];
+      ++mk;
+    }
+  delete(raw);
+  raw = tmpr;
+}
+
+void Bitmap::fliph() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel *tmpm[row];
+  for(int c = 0; c < row; ++c )
+    tmpm[c] = &tmpr[c * col];
+  int mk = 0;
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c) {
+      tmpm[row - r][c] = raw[mk];
+      ++mk;
+    }
+  delete(raw);
+  raw = tmpr;
+}
+
+void Bitmap::flipd1() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel *tmpm[col];
+  for(int c = 0; c < col; ++c)
+    tmpm[c] = &tmpr[c * row];
+  int mk = 0;
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c) {
+      tmpm[c][row - r] = raw[mk];
+      ++mk;
+    }
+  delete(raw);
+  raw = tmpr;
+  iHead.iWide = row;
+  iHead.iHigh = col;
+}
+
+void Bitmap::flipd2() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel *tmpm[col];
+  for(int c = 0; c < col; ++c)
+    tmpm[c] = &tmpr[c * row];
+  int mk = 0;
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c) {
+      tmpm[col - c][row - r] = raw[mk];
+      ++mk;
+    }
+  //delete(raw);
+  raw = tmpr;
+  iHead.iWide = row;
+  iHead.iHigh = col;
+}
+
 
 void Bitmap::scaleUp() {
   int col = iHead.iWide * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)

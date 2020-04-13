@@ -79,19 +79,19 @@ int main(int argc, char** argv)
     }
   if(flag == "-v"s)
     {
-      //flipv(image);
+      image.flipv();
     }
   if(flag == "-h"s)
     {
-      //fliph(image);
+      image.fliph();
     }
   if(flag == "-d1"s)
     {
-      //flipd1(image);
+      image.flipd1();
     }
   if(flag == "-d2"s)
     {
-      //flipd2(image);
+      image.flipd2();
     }
   if(flag == "-grow"s)
     {

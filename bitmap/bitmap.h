@@ -91,6 +91,10 @@ public:
   void rot90();
   void rot180();
   void rot270();
+  void flipv();
+  void fliph();
+  void flipd1();
+  void flipd2();
   void scaleUp();
   void scaleDown();
 
