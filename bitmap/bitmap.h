@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
+#include <bitset>
+#include <cstring>
 using namespace std;
 
 
@@ -75,9 +76,9 @@ private:
   FileHeader fHead{};                           // BMP file format header
   ImageHeader iHead{};                          // Image data header
   Pixel* raw{};                                 // Raw image data
-  //Pixel** map{};                                // Imaged data mapped
   ColorWheel mask{};                            // Bit mask data
 
+  static uint32_t Unmask(const uint32_t Cmask, const uint32_t Cpixel);
   void Measure();
   void PixelateBlock(int row, int col, Pixel **tmp);
   void FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap &boarders);
