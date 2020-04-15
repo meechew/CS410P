@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "modernize-use-auto"
-#pragma ide diagnostic ignored "hicpp-use-auto"
 // Created by CBunt on 1 APR 2020.
 //
 
@@ -28,15 +25,20 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
   in.read((char *) &b.iHead.YpPm, 4);
   in.read((char *) &b.iHead.iColr, 4);
   in.read((char *) &b.iHead.eColr, 4);
-  int pixels;
+  int pixels = b.iHead.iWide * b.iHead.iHigh;
+
   if (!b.iHead.compr) {
+    b.pad = b.iHead.iWide % 4;
     in.seekg(b.fHead.offst);
-    pixels = b.iHead.iSize / 3; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
     b.raw = new Bitmap::Pixel[pixels];
     for (int c = 0; c < pixels; ++c) {
       b.raw[c].R = in.get();
       b.raw[c].G = in.get();
       b.raw[c].B = in.get();
+      if (b.pad) {
+        in.ignore( b.pad);
+      }
+
     }
   } else {
     uint32_t buff;
@@ -44,9 +46,7 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
     in.read((char *) &b.mask.Gmask, 4);
     in.read((char *) &b.mask.Bmask, 4);
     in.read((char *) &b.mask.Amask, 4);
-    in.seekg(b.fHead.offst);
-    pixels = b.iHead.iSize / 4; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
-    b.raw = new Bitmap::Pixel[pixels];
+    in.seekg(b.fHead.offst);    b.raw = new Bitmap::Pixel[pixels];
     for (int c = 0; c < pixels; ++c) {
       in.read((char *) &buff, 4);
       b.raw[c].R = Bitmap::Unmask(b.mask.Rmask, buff);
@@ -81,12 +81,14 @@ std::ostream &operator<<(std::ostream &out, const Bitmap &b) {
     out.write((char*) &b.mask.Bmask, 4);
     out.write((char*) &b.mask.Amask, 4);
   }
-  int len = b.iHead.iWide * b.iHead.iHigh; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+  int len = b.iHead.iWide * b.iHead.iHigh;
   if (!b.iHead.compr){
     for(int k = 0; k < len; ++k){
       out.put(b.raw[k].R);
       out.put(b.raw[k].G);
       out.put(b.raw[k].B);
+      if (b.pad)
+        out.write((char*) '\0', b.pad);
     }
   }
   else {
@@ -105,8 +107,8 @@ std::ostream &operator<<(std::ostream &out, const Bitmap &b) {
 }
 
 
-void Bitmap::cellShade() {
-  int len = iHead.iWide * iHead.iHigh; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+void Bitmap::IcellShade() {
+  int len = iHead.iWide * iHead.iHigh;
   for(int k = 0; k < len; ++k){
     if (raw[k].R < 64)
       raw[k].R = 0;
@@ -125,8 +127,8 @@ void Bitmap::cellShade() {
     else raw[k].B = 255;
   }
 }
-void Bitmap::grayscale() {
-  int len = iHead.iWide * iHead.iHigh; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+void Bitmap::Igrayscale() {
+  int len = iHead.iWide * iHead.iHigh;
   int pix;
   for(int k = 0; k < len; ++k){
     pix = (raw[k].B + raw[k].G + raw[k].R) / 3;
@@ -136,7 +138,7 @@ void Bitmap::grayscale() {
   }
 }
 
-void Bitmap::pixelate() {
+void Bitmap::Ipixelate() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -178,7 +180,7 @@ void Bitmap::FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap 
     }
 }
 
-void Bitmap::blur() {
+void Bitmap::Iblur() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -234,7 +236,7 @@ Bitmap::Pixel Bitmap::KernelBlur(int row, int col, Pixel **map) {
   return ret;
 }
 
-void Bitmap::rot90() {
+void Bitmap::Irot90() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -253,7 +255,7 @@ void Bitmap::rot90() {
   iHead.iHigh = col;
 }
 
-void Bitmap::rot180() {
+void Bitmap::Irot180() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -270,7 +272,7 @@ void Bitmap::rot180() {
   raw = tmpr;
 }
 
-void Bitmap::rot270() {
+void Bitmap::Irot270() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -289,7 +291,7 @@ void Bitmap::rot270() {
   iHead.iHigh = col;
 }
 
-void Bitmap::flipv() {
+void Bitmap::Iflipv() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -306,7 +308,7 @@ void Bitmap::flipv() {
   raw = tmpr;
 }
 
-void Bitmap::fliph() {
+void Bitmap::Ifliph() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -324,7 +326,7 @@ void Bitmap::fliph() {
 }
 
 
-void Bitmap::flipd1() {
+void Bitmap::Iflipd1() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -343,7 +345,7 @@ void Bitmap::flipd1() {
   iHead.iHigh = col;
 }
 
-void Bitmap::flipd2() {
+void Bitmap::Iflipd2() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -362,9 +364,9 @@ void Bitmap::flipd2() {
   iHead.iHigh = col;
 }
 
-void Bitmap::scaleUp() {
-  int col = iHead.iWide * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
-  int row = iHead.iHigh * 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+void Bitmap::IscaleUp() {
+  int col = iHead.iWide * 2;
+  int row = iHead.iHigh * 2;
   Pixel *tmpr = new Pixel[col * row];
   Pixel **tmpm = new Pixel*[row];
   for(int c = 0; c < col; ++c )
@@ -385,9 +387,9 @@ void Bitmap::scaleUp() {
   Measure();
 }
 
-void Bitmap::scaleDown() {
-  int col = iHead.iWide / 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
-  int row = iHead.iHigh / 2; // NOLINT(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
+void Bitmap::IscaleDown() {
+  int col = iHead.iWide / 2;
+  int row = iHead.iHigh / 2;
   Pixel *tmpr = new Pixel[col * row];
   Pixel **tmpm = new Pixel*[row];
   for(int c = 0; c < col; ++c )
@@ -417,14 +419,16 @@ void Bitmap::scaleDown() {
 void Bitmap::Measure() {
   if (!iHead.compr) {
     iHead.iSize = ((iHead.iWide * iHead.iHigh) / 4) * 3 * sizeof(Pixel);
+    pad = iHead.iWide % 4;
   }
   else {
     iHead.iSize = iHead.iWide * iHead.iHigh * sizeof(Pixel);
   }
+  iHead.iSize += pad * iHead.iHigh;
   iHead.hSize = sizeof iHead;
   fHead.offst = sizeof fHead + iHead.hSize;
   if (iHead.compr)
-    fHead.offst += sizeof mask;
+    fHead.offst += sizeof mask + 68;
   fHead.offst -= 2;
   fHead.fSize = fHead.offst + iHead.iSize;
 }
@@ -443,7 +447,6 @@ uint32_t Bitmap::Unmask(const uint32_t Cmask, const uint32_t Cpixel) {
     if(Tmask[k])
     ret[k] = Tmask[k] && Tpixel[k];
     else break;
-  int t = ret.to_ulong();
   return ret.to_ulong();
 }
 
@@ -470,10 +473,5 @@ Bitmap::Pixel::Pixel(char nR, char nG, char nB, char nA) {
   B = nB;
   A = nA;
 }
-
-
-
-#pragma clang diagnostic pop
-
 
 

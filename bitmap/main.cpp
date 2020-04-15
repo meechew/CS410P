@@ -51,55 +51,55 @@ int main(int argc, char** argv)
 
   if(flag == "-c"s)
     {
-      image.cellShade();
+      cellShade(image);
     }
   if(flag == "-g"s)
     {
-      image.grayscale();
+      grayscale(image);
     }
   if(flag == "-p"s)
     {
-      image.pixelate();
+      pixelate(image);
     }
   if(flag == "-b"s)
     {
-      image.blur();
+      blur(image);
     }
   if(flag == "-r90"s)
     {
-      image.rot90();
+      rot90(image);
     }
   if(flag == "-r180"s)
     {
-      image.rot180();
+      rot180(image);
     }
   if(flag == "-r270"s)
     {
-      image.rot270();
+      rot270(image);
     }
   if(flag == "-v"s)
     {
-      image.flipv();
+      flipv(image);
     }
   if(flag == "-h"s)
     {
-      image.fliph();
+      fliph(image);
     }
   if(flag == "-d1"s)
     {
-      image.flipd1();
+      flipd1(image);
     }
   if(flag == "-d2"s)
     {
-      image.flipd2();
+      flipd2(image);
     }
   if(flag == "-grow"s)
     {
-      image.scaleUp();
+      scaleUp(image);
     }
   if(flag == "-shrink"s)
     {
-      image.scaleDown();
+      scaleDown(image);
     }
 
   out.open(outfile, ios::binary);

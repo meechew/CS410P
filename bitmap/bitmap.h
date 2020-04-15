@@ -78,6 +78,7 @@ private:
   ImageHeader iHead{};                          // Image data header
   Pixel* raw{};                                 // Raw image data
   ColorWheel mask{};                            // Bit mask data
+  uint8_t pad;                                  // width of the padding
 
   static uint32_t Unmask(const uint32_t Cmask, const uint32_t Cpixel);
   void Measure();
@@ -87,19 +88,19 @@ private:
 public:
   Bitmap();
   ~Bitmap();
-  void cellShade();
-  void grayscale();
-  void pixelate();
-  void blur();
-  void rot90();
-  void rot180();
-  void rot270();
-  void flipv();
-  void fliph();
-  void flipd1();
-  void flipd2();
-  void scaleUp();
-  void scaleDown();
+  void IcellShade();
+  void Igrayscale();
+  void Ipixelate();
+  void Iblur();
+  void Irot90();
+  void Irot180();
+  void Irot270();
+  void Iflipv();
+  void Ifliph();
+  void Iflipd1();
+  void Iflipd2();
+  void IscaleUp();
+  void IscaleDown();
 
 
 };
@@ -112,67 +113,67 @@ public:
  * This has the effect of making the image look like.
  * it was colored.
  */
-void cellShade(Bitmap& b);
+void cellShade(Bitmap& b) {b.IcellShade();}
 
 /**
  * Grayscales an image by averaging all of the components.
  */
-void grayscale(Bitmap& b);
+void grayscale(Bitmap& b) {b.Igrayscale();}
 
 /**
  * Pixelats an image by creating groups of 16*16 pixel blocks.
  */
-void pixelate(Bitmap& b);
+void pixelate(Bitmap& b) {b.Ipixelate();}
 
 /**
  * Use gaussian bluring to blur an image.
  */
-void blur(Bitmap& b);
+void blur(Bitmap& b) {b.Iblur();} //TODO: not rendering images correctly. needs to be debugged.
 
 /**
  * rotates image 90 degrees, swapping the height and width.
  */
-void rot90(Bitmap& b);
+void rot90(Bitmap& b) {b.Irot90();}
 
 /**
  * rotates an image by 180 degrees.
  */
-void rot180(Bitmap& b);
+void rot180(Bitmap& b) {b.Irot180();}
 
 /**
  * rotates image 270 degrees, swapping the height and width.
  */
-void rot270(Bitmap& b);
+void rot270(Bitmap& b) {b.Irot270();}
 
 /**
  * flips and image over the vertical axis.
  */
-void flipv(Bitmap& b);
+void flipv(Bitmap& b) {b.Iflipv();}
 
 /**
  * flips and image over the horizontal axis.
  */
-void fliph(Bitmap& b);
+void fliph(Bitmap& b) {b.Ifliph();}
 
 /**
  * flips and image over the line y = -x, swapping the height and width.
  */
-void flipd1(Bitmap& b);
+void flipd1(Bitmap& b) {b.Iflipd1();}
 
 /**
  * flips and image over the line y = xr, swapping the height and width.
  */
-void flipd2(Bitmap& b);
+void flipd2(Bitmap& b) {b.Iflipd2();}
 
 /**
  * scales the image by a factor of 2.
  */
-void scaleUp(Bitmap& b);
+void scaleUp(Bitmap& b) {b.IscaleUp();}
 
 /**
  * scales the image by a factor of 1/2.
  */
-void scaleDown(Bitmap& b);
+void scaleDown(Bitmap& b) {b.IscaleDown();}
 
 
 
