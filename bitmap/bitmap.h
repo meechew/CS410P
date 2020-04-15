@@ -64,6 +64,7 @@ private:
     Pixel();
     Pixel(char nR, char nG, char nB);
     Pixel(char nR, char nG, char nB, char nA);
+
   };
 
   struct ColorWheel{
@@ -82,6 +83,7 @@ private:
   void Measure();
   void PixelateBlock(int row, int col, Pixel **tmp);
   void FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap &boarders);
+  Pixel KernelBlur(int row, int col, Pixel **map);
 public:
   Bitmap();
   ~Bitmap();

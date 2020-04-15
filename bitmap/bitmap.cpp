@@ -179,7 +179,59 @@ void Bitmap::FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap 
 }
 
 void Bitmap::blur() {
+  int col = iHead.iWide;
+  int row = iHead.iHigh;
+  Pixel *tmpr = new Pixel[col * row];
+  Pixel *tmap[row];
+  int mk = 0;
+  for(int c = 0; c < row; ++c )
+    tmap[c] = &raw[c * col];
 
+  for(int r = 0; r < row; ++r)
+    for(int c = 0; c < col; ++c){
+      tmpr[mk] = KernelBlur(r, c, tmap);
+      mk++;
+      }
+  delete raw;
+  raw = tmpr;
+}
+
+Bitmap::Pixel Bitmap::KernelBlur(int row, int col, Pixel **map) {
+  Pixel ret;
+  Pixel ker[25];
+  int k = 0;
+  for(int r = row-2; r < 3; ++r)
+    for(int c = col-2; c < 3; ++c) {
+      if(c + col < 0 || r + row <0|| c + col > iHead.iWide || r + row > iHead.iHigh) {
+        k++;
+        continue;
+      }
+      ker[k] = map[r][c];
+      ++k;
+    }
+  ret.R += (ker[0].R + ker[4].R + ker[20].R + ker[24].R)/1024;
+  ret.G += (ker[0].G + ker[4].G + ker[20].G + ker[24].G)/1024;
+  ret.B += (ker[0].B + ker[4].B + ker[20].B + ker[24].B)/1024;
+  ret.R += (ker[1].R + ker[3].R + ker[5].R + ker[9].R)/1024;
+  ret.R += (ker[1].R + ker[3].R + ker[5].R + ker[9].R) * 4 /1024;
+  ret.G += (ker[1].G + ker[3].G + ker[5].G + ker[9].G) * 4 /1024;
+  ret.G += (ker[15].G + ker[19].G + ker[21].G + ker[23].G) * 4 /1024;
+  ret.B += (ker[15].B + ker[19].B + ker[21].B + ker[23].B) * 4 /1024;
+  ret.B += (ker[15].B + ker[19].B + ker[21].B + ker[23].B) * 4 /1024;
+  ret.G += (ker[15].G + ker[10].G + ker[14].G + ker[22].G) * 6 /1024;
+  ret.B += (ker[15].B + ker[10].B + ker[14].B + ker[22].B) * 6 /1024;
+  ret.B += (ker[15].B + ker[10].B + ker[14].B + ker[22].B) * 6 /1024;
+  ret.G += (ker[6].G + ker[8].G + ker[16].G + ker[18].G) * 16 /1024;
+  ret.B += (ker[6].B + ker[8].B + ker[16].B + ker[18].B) * 16 /1024;
+  ret.B += (ker[6].B + ker[8].B + ker[16].B + ker[18].B) * 16 /1024;
+  ret.G += (ker[7].G + ker[11].G + ker[13].G + ker[17].G) * 24 /1024;
+  ret.B += (ker[7].B + ker[11].B + ker[13].B + ker[17].B) * 24 /1024;
+  ret.B += (ker[7].B + ker[11].B + ker[13].B + ker[17].B) * 24 /1024;
+  ret.G += ker[12].G * 36 /256;
+  ret.B += ker[12].B * 36 /256;
+  ret.B += ker[12].B * 36 /256;
+
+  return ret;
 }
 
 void Bitmap::rot90() {
@@ -394,6 +446,8 @@ uint32_t Bitmap::Unmask(const uint32_t Cmask, const uint32_t Cpixel) {
   int t = ret.to_ulong();
   return ret.to_ulong();
 }
+
+
 
 Bitmap::Bitmap() = default;
 Bitmap::~Bitmap() = default;
