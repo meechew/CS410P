@@ -220,7 +220,7 @@ Bitmap::Pixel Bitmap::KernelBlur(int row, int col, Pixel **map) {
   int k = 0;
   for(int r = row-2; r < row + 3; ++r)
     for(int c = col-2; c < col + 3; ++c) {
-      if(c + col < 0 || r + row < 0|| c + col > iHead.iWide || r + row > iHead.iHigh) {
+      if(c < 0 || r < 0|| c > iHead.iWide || r > iHead.iHigh) {
         k++;
         continue;
       }
