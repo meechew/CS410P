@@ -10,7 +10,7 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
 
   in.read((char *) &b.fHead.type, 2);
   if (strncmp(b.fHead.type, "BM", 2))
-    throw BitmapException("***File Format ERROR***", __LINE__, __func__);
+    throw BitmapException("\t***File Format ERROR***\n", __LINE__, __func__);
   in.read((char *) &b.fHead.fSize, 4);
   in.read((char *) &b.fHead.grbge, 4);
   in.read((char *) &b.fHead.offst, 4);
@@ -220,7 +220,7 @@ Bitmap::Pixel Bitmap::KernelBlur(int row, int col, Pixel **map) {
   int k = 0;
   for(int r = row-2; r < row + 3; ++r)
     for(int c = col-2; c < col + 3; ++c) {
-      if(c + col < 0 || r + row <0|| c + col > iHead.iWide || r + row > iHead.iHigh) {
+      if(c + col < 0 || r + row < 0|| c + col > iHead.iWide || r + row > iHead.iHigh) {
         k++;
         continue;
       }
@@ -490,6 +490,11 @@ Bitmap::Pixel::Pixel(char nR, char nG, char nB, char nA) {
   A = nA;
 }
 
+BitmapException::BitmapException(const std::string &message, uint32_t position) {
+  _message = message;
+  _position = position;
+  _function = "FUNCTION NAME NOT GIVE";
+}
 
 BitmapException::BitmapException(std::string &&message, uint32_t position, std::string &&function) {
   _message = message;
@@ -498,5 +503,5 @@ BitmapException::BitmapException(std::string &&message, uint32_t position, std::
 }
 
 void BitmapException::print_exception() {
-  cerr << _message << endl <<  "\tIn " << _function << "at position 0x" << _position;
+  cerr << _message << endl <<  "\tIn " << _function << " at position 0x" << _position << endl;
 }
