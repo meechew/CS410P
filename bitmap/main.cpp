@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     }
   catch(BitmapException& e)
     {
-      //e.print_exception();
+      e.print_exception();
       return 0;
     }
 

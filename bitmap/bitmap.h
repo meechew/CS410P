@@ -88,19 +88,19 @@ private:
 public:
   Bitmap();
   ~Bitmap();
-  void IcellShade();
-  void Igrayscale();
-  void Ipixelate();
-  void Iblur();
-  void Irot90();
-  void Irot180();
-  void Irot270();
-  void Iflipv();
-  void Ifliph();
-  void Iflipd1();
-  void Iflipd2();
-  void IscaleUp();
-  void IscaleDown();
+  void cellShade();
+  void grayscale();
+  void pixelate();
+  void blur();
+  void rot90();
+  void rot180();
+  void rot270();
+  void flipv();
+  void fliph();
+  void flipd1();
+  void flipd2();
+  void scaleUp();
+  void scaleDown();
 
 
 };
@@ -113,67 +113,67 @@ public:
  * This has the effect of making the image look like.
  * it was colored.
  */
-void cellShade(Bitmap& b) {b.IcellShade();}
+void cellShade(Bitmap& b);
 
 /**
  * Grayscales an image by averaging all of the components.
  */
-void grayscale(Bitmap& b) {b.Igrayscale();}
+void grayscale(Bitmap& b);
 
 /**
  * Pixelats an image by creating groups of 16*16 pixel blocks.
  */
-void pixelate(Bitmap& b) {b.Ipixelate();}
+void pixelate(Bitmap& b);
 
 /**
  * Use gaussian bluring to blur an image.
  */
-void blur(Bitmap& b) {b.Iblur();} //TODO: not rendering images correctly. needs to be debugged.
+void blur(Bitmap& b); //TODO: not rendering images correctly. needs to be debugged.
 
 /**
  * rotates image 90 degrees, swapping the height and width.
  */
-void rot90(Bitmap& b) {b.Irot90();}
+void rot90(Bitmap& b);
 
 /**
  * rotates an image by 180 degrees.
  */
-void rot180(Bitmap& b) {b.Irot180();}
+void rot180(Bitmap& b);
 
 /**
  * rotates image 270 degrees, swapping the height and width.
  */
-void rot270(Bitmap& b) {b.Irot270();}
+void rot270(Bitmap& b);
 
 /**
  * flips and image over the vertical axis.
  */
-void flipv(Bitmap& b) {b.Iflipv();}
+void flipv(Bitmap& b);
 
 /**
  * flips and image over the horizontal axis.
  */
-void fliph(Bitmap& b) {b.Ifliph();}
+void fliph(Bitmap& b);
 
 /**
  * flips and image over the line y = -x, swapping the height and width.
  */
-void flipd1(Bitmap& b) {b.Iflipd1();}
+void flipd1(Bitmap& b);
 
 /**
  * flips and image over the line y = xr, swapping the height and width.
  */
-void flipd2(Bitmap& b) {b.Iflipd2();}
+void flipd2(Bitmap& b);
 
 /**
  * scales the image by a factor of 2.
  */
-void scaleUp(Bitmap& b) {b.IscaleUp();}
+void scaleUp(Bitmap& b);
 
 /**
  * scales the image by a factor of 1/2.
  */
-void scaleDown(Bitmap& b) {b.IscaleDown();}
+void scaleDown(Bitmap& b);
 
 
 
@@ -185,14 +185,17 @@ class BitmapException : public std::exception
   // the message to print out
   std::string _message;
 
-  // position in the bitmap file (in bytes) where the error occured.
+  // position in the bitmap file (in bytes) where the error occurred.
   uint32_t _position;
+
+  // Function that threw exception.
+  std::string _function;
 
 public:
   BitmapException() = delete;
 
   BitmapException(const std::string& message, uint32_t position);
-  BitmapException(std::string&& message, uint32_t position);
+  BitmapException(std::string &&message, uint32_t position, std::string &&function);
 
   /**
    * prints out the exception in the form:

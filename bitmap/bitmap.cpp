@@ -9,8 +9,8 @@
 std::istream &operator>>(std::istream &in, Bitmap &b) {
 
   in.read((char *) &b.fHead.type, 2);
-  if (!strncmp(b.fHead.type, "BM", 2));
-  //throw ; //TODO: Write throw.
+  if (strncmp(b.fHead.type, "BM", 2))
+    throw BitmapException("***File Format ERROR***", __LINE__, __func__);
   in.read((char *) &b.fHead.fSize, 4);
   in.read((char *) &b.fHead.grbge, 4);
   in.read((char *) &b.fHead.offst, 4);
@@ -25,28 +25,29 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
   in.read((char *) &b.iHead.YpPm, 4);
   in.read((char *) &b.iHead.iColr, 4);
   in.read((char *) &b.iHead.eColr, 4);
+
   int pixels = b.iHead.iWide * b.iHead.iHigh;
+  b.raw = new Bitmap::Pixel[pixels];
 
   if (!b.iHead.compr) {
     b.pad = b.iHead.iWide % 4;
     in.seekg(b.fHead.offst);
-    b.raw = new Bitmap::Pixel[pixels];
     for (int c = 0; c < pixels; ++c) {
       b.raw[c].R = in.get();
       b.raw[c].G = in.get();
       b.raw[c].B = in.get();
-      if (b.pad) {
-        in.ignore( b.pad);
+      if ((c + 1) % b.iHead.iWide == 0) {
+        in.ignore(b.pad);
       }
-
     }
+
   } else {
     uint32_t buff;
     in.read((char *) &b.mask.Rmask, 4);
     in.read((char *) &b.mask.Gmask, 4);
     in.read((char *) &b.mask.Bmask, 4);
     in.read((char *) &b.mask.Amask, 4);
-    in.seekg(b.fHead.offst);    b.raw = new Bitmap::Pixel[pixels];
+    in.seekg(b.fHead.offst);
     for (int c = 0; c < pixels; ++c) {
       in.read((char *) &buff, 4);
       b.raw[c].R = Bitmap::Unmask(b.mask.Rmask, buff);
@@ -55,6 +56,7 @@ std::istream &operator>>(std::istream &in, Bitmap &b) {
       b.raw[c].A = Bitmap::Unmask(b.mask.Amask, buff);
     }
   }
+
   return in;
 }
 
@@ -82,13 +84,14 @@ std::ostream &operator<<(std::ostream &out, const Bitmap &b) {
     out.write((char*) &b.mask.Amask, 4);
   }
   int len = b.iHead.iWide * b.iHead.iHigh;
+  uint64_t ZERO[1] = {0};
   if (!b.iHead.compr){
     for(int k = 0; k < len; ++k){
       out.put(b.raw[k].R);
       out.put(b.raw[k].G);
       out.put(b.raw[k].B);
-      if (b.pad)
-        out.write((char*) '\0', b.pad);
+      if ((k + 1) % b.iHead.iWide == 0)
+        out.write((char*)ZERO, b.pad);
     }
   }
   else {
@@ -106,8 +109,21 @@ std::ostream &operator<<(std::ostream &out, const Bitmap &b) {
   return out;
 }
 
+void cellShade(Bitmap &b) {b.cellShade();}
+void grayscale(Bitmap& b) {b.grayscale();}
+void pixelate(Bitmap& b) { b.pixelate();}
+void blur(Bitmap& b) { b.blur();}
+void rot90(Bitmap& b) { b.rot90();}
+void rot180(Bitmap& b) { b.rot180();}
+void rot270(Bitmap& b) { b.rot270();}
+void flipv(Bitmap& b) { b.flipv();}
+void fliph(Bitmap& b) { b.fliph();}
+void flipd1(Bitmap& b) { b.flipd1();}
+void flipd2(Bitmap& b) { b.flipd2();}
+void scaleUp(Bitmap& b) { b.scaleUp();}
+void scaleDown(Bitmap& b) { b.scaleDown();}
 
-void Bitmap::IcellShade() {
+void Bitmap::cellShade() {
   int len = iHead.iWide * iHead.iHigh;
   for(int k = 0; k < len; ++k){
     if (raw[k].R < 64)
@@ -127,7 +143,7 @@ void Bitmap::IcellShade() {
     else raw[k].B = 255;
   }
 }
-void Bitmap::Igrayscale() {
+void Bitmap::grayscale() {
   int len = iHead.iWide * iHead.iHigh;
   int pix;
   for(int k = 0; k < len; ++k){
@@ -138,7 +154,7 @@ void Bitmap::Igrayscale() {
   }
 }
 
-void Bitmap::Ipixelate() {
+void Bitmap::pixelate() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -180,7 +196,7 @@ void Bitmap::FillBlock(int row, int col, Pixel **tmp, int met, Pixel &p, Bitmap 
     }
 }
 
-void Bitmap::Iblur() {
+void Bitmap::blur() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -236,7 +252,7 @@ Bitmap::Pixel Bitmap::KernelBlur(int row, int col, Pixel **map) {
   return ret;
 }
 
-void Bitmap::Irot90() {
+void Bitmap::rot90() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -255,7 +271,7 @@ void Bitmap::Irot90() {
   iHead.iHigh = col;
 }
 
-void Bitmap::Irot180() {
+void Bitmap::rot180() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -272,7 +288,7 @@ void Bitmap::Irot180() {
   raw = tmpr;
 }
 
-void Bitmap::Irot270() {
+void Bitmap::rot270() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -291,7 +307,7 @@ void Bitmap::Irot270() {
   iHead.iHigh = col;
 }
 
-void Bitmap::Iflipv() {
+void Bitmap::flipv() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -308,7 +324,7 @@ void Bitmap::Iflipv() {
   raw = tmpr;
 }
 
-void Bitmap::Ifliph() {
+void Bitmap::fliph() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -326,7 +342,7 @@ void Bitmap::Ifliph() {
 }
 
 
-void Bitmap::Iflipd1() {
+void Bitmap::flipd1() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -345,7 +361,7 @@ void Bitmap::Iflipd1() {
   iHead.iHigh = col;
 }
 
-void Bitmap::Iflipd2() {
+void Bitmap::flipd2() {
   int col = iHead.iWide;
   int row = iHead.iHigh;
   Pixel *tmpr = new Pixel[col * row];
@@ -364,7 +380,7 @@ void Bitmap::Iflipd2() {
   iHead.iHigh = col;
 }
 
-void Bitmap::IscaleUp() {
+void Bitmap::scaleUp() {
   int col = iHead.iWide * 2;
   int row = iHead.iHigh * 2;
   Pixel *tmpr = new Pixel[col * row];
@@ -387,7 +403,7 @@ void Bitmap::IscaleUp() {
   Measure();
 }
 
-void Bitmap::IscaleDown() {
+void Bitmap::scaleDown() {
   int col = iHead.iWide / 2;
   int row = iHead.iHigh / 2;
   Pixel *tmpr = new Pixel[col * row];
@@ -475,3 +491,12 @@ Bitmap::Pixel::Pixel(char nR, char nG, char nB, char nA) {
 }
 
 
+BitmapException::BitmapException(std::string &&message, uint32_t position, std::string &&function) {
+  _message = message;
+  _position = position;
+  _function = function;
+}
+
+void BitmapException::print_exception() {
+  cerr << _message << endl <<  "\tIn " << _function << "at position 0x" << _position;
+}
