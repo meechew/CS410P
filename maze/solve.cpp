@@ -126,3 +126,5 @@ path solve_tour(Maze& m, int rows, int cols)
 {
     return list<point>();
 }
+
+

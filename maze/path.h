@@ -41,6 +41,10 @@ inline point moveIn(const int dir)
     return make_pair(-1,-1);
 }
 
+inline point operator+(const point& l, const point& r) {
+  return make_pair(l.first+r.first, l.second+r.second);
+}
+
 inline int direction(const point& p1, const point& p2)
 {
     if(p1 + moveIn(UP)    == p2) return UP;
@@ -48,10 +52,6 @@ inline int direction(const point& p1, const point& p2)
     if(p1 + moveIn(LEFT)  == p2) return LEFT;
     if(p1 + moveIn(RIGHT) == p2) return RIGHT;
     return FAIL;
-}
-
-inline point operator+(const point& l, const point& r) {
-    return make_pair(l.first+r.first, l.second+r.second);
 }
 
 #endif // PATH_H
