@@ -107,15 +107,61 @@ int main(int argc, char** argv)
     }
 }
 
+////////////////////////////////////////////////////////////////////////
+//
+// Depth first
+//
+////////////////////////////////////////////////////////////////////////
+
+class DFS_model {
+private:
+  Maze* obstacle;
+  int cols;
+  int rows;
+  int DFS_TestSquare(point current);
+public:
+  DFS_model() = default;
+  DFS_model(Maze& m, int rows, int cols);
+  path Start();
+
+};
+
 path solve_dfs(Maze& m, int rows, int cols)
 {
-    return list<point>();
+  DFS_model solve(m, rows, cols);
+  solve.Start();
+  return list<point>();
 }
+
+path DFS_model::Start() {
+  DFS_TestSquare(make_pair(0,0));
+}
+
+
+int DFS_model::DFS_TestSquare(point current) {
+  for(int k = 0; k < 4; ++k)
+    if(obstacle->can_go(current.first, current.second, k)){
+      DFS_TestSquare(moveIn(k));
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// Breadth first
+//
+////////////////////////////////////////////////////////////////////////
 
 path solve_bfs(Maze& m, int rows, int cols)
 {
     return list<point>();
 }
+
+////////////////////////////////////////////////////////////////////////
+//
+// Dijkstra's algorithm
+//
+////////////////////////////////////////////////////////////////////////
 
 path solve_dijkstra(Maze& m, int rows, int cols)
 {
