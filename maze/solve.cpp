@@ -123,7 +123,7 @@ public:
 };
 
 bool Search::CourseCK(point cur, int dir) {
-  point p = moveIn(dir);
+  point p = cur + moveIn(dir);
   for(auto k : course)
     if(p == k)
       return true;
@@ -186,7 +186,7 @@ path DFS_model::DFS_TestSquare(point cur) {
   for(int k = 0; k < 4; ++k)
     if(obstacle->can_go(k, cur.first, cur.second))
       if(!CourseCK(cur, k))
-        p[k] = DFS_TestSquare(moveIn(k));
+        p[k] = DFS_TestSquare(cur + moveIn(k));
 
   for(auto & k : p)
     if (!k.empty())
