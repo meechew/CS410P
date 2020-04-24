@@ -107,43 +107,94 @@ int main(int argc, char** argv)
     }
 }
 
+
+class Search {
+protected:
+  Maze* obstacle;
+  int rows;
+  int cols;
+  path course;
+  bool CourseCK(point, int dir);
+  bool BoundsCk(point cur, int dir);
+public:
+  Search(Maze &m, int c, int r): obstacle(&m), rows(r), cols(c) {}
+
+  virtual path Start() = 0;
+};
+
+bool Search::CourseCK(point cur, int dir) {
+  point p = moveIn(dir);
+  for(auto k : course)
+    if(p == k)
+      return true;
+  return false;
+}
+
+bool Search::BoundsCk(point cur, int dir) {
+  switch(dir) {
+    case UP:
+      if (cur.first == 0)
+        return false;
+      return true;
+    case LEFT:
+      if (cur.second == 0)
+        return false;
+      return true;
+    case DOWN:
+      if (cur.first == rows - 1)
+        return false;
+      return true;
+    case RIGHT:
+      if (cur.second == cols - 1)
+        return false;
+      return true;
+  }
+  return false;
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 // Depth first
 //
 ////////////////////////////////////////////////////////////////////////
 
-class DFS_model {
+class DFS_model: private Search {
 private:
-  Maze* obstacle;
-  int cols;
-  int rows;
-  int DFS_TestSquare(point current);
+  path DFS_TestSquare(point cur);
 public:
   DFS_model() = default;
-  DFS_model(Maze& m, int rows, int cols);
-  path Start();
-
+  DFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
+  path Start() override;
 };
 
 path solve_dfs(Maze& m, int rows, int cols)
 {
   DFS_model solve(m, rows, cols);
-  solve.Start();
-  return list<point>();
+  return solve.Start();
 }
 
 path DFS_model::Start() {
-  DFS_TestSquare(make_pair(0,0));
+  return DFS_TestSquare(make_pair(0,0));
 }
 
+path DFS_model::DFS_TestSquare(point cur) {
+  if(cur == make_pair(rows - 1, cols - 1))
+    return path(1, cur);
+  course.push_front(cur);
+  path p[4], ret;
 
-int DFS_model::DFS_TestSquare(point current) {
   for(int k = 0; k < 4; ++k)
-    if(obstacle->can_go(current.first, current.second, k)){
-      DFS_TestSquare(moveIn(k));
-    }
+    if(obstacle->can_go(k, cur.first, cur.second))
+      if(!CourseCK(cur, k))
+        p[k] = DFS_TestSquare(moveIn(k));
 
+  for(auto & k : p)
+    if (!k.empty())
+      if(k < ret)
+        ret = k;
+
+  course.pop_front();
+  return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////
