@@ -189,11 +189,12 @@ path DFS_model::DFS_TestSquare(point cur) {
         p[k] = DFS_TestSquare(cur + moveIn(k));
 
   for(auto & k : p)
-    if (!k.empty())
-      if(k < ret)
+    if(k.back() == make_pair(rows - 1, cols - 1))
+      if(ret.empty() || ret.size() > k.size())
         ret = k;
 
   course.pop_front();
+  ret.push_front(cur);
   return ret;
 }
 
