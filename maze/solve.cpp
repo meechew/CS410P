@@ -113,11 +113,13 @@ protected:
   Maze* obstacle;
   int rows;
   int cols;
+  point goal;
   path course;
   bool CourseCK(point, int dir);
-  bool BoundsCk(point cur, int dir);
 public:
-  Search(Maze &m, int c, int r): obstacle(&m), rows(r), cols(c) {}
+  Search(Maze &m, int c, int r): obstacle(&m), rows(r), cols(c) {
+    goal = make_pair(r - 1, c - 1);
+  }
 
   virtual path Start() = 0;
 };
@@ -127,28 +129,6 @@ bool Search::CourseCK(point cur, int dir) {
   for(auto k : course)
     if(p == k)
       return true;
-  return false;
-}
-
-bool Search::BoundsCk(point cur, int dir) {
-  switch(dir) {
-    case UP:
-      if (cur.first == 0)
-        return false;
-      return true;
-    case LEFT:
-      if (cur.second == 0)
-        return false;
-      return true;
-    case DOWN:
-      if (cur.first == rows - 1)
-        return false;
-      return true;
-    case RIGHT:
-      if (cur.second == cols - 1)
-        return false;
-      return true;
-  }
   return false;
 }
 
@@ -178,18 +158,20 @@ path DFS_model::Start() {
 }
 
 path DFS_model::DFS_TestSquare(point cur) {
-  if(cur == make_pair(rows - 1, cols - 1))
+  if(cur == goal)
     return path(1, cur);
   course.push_front(cur);
   path p[4], ret;
 
+  //
   for(int k = 0; k < 4; ++k)
     if(obstacle->can_go(k, cur.first, cur.second))
       if(!CourseCK(cur, k))
         p[k] = DFS_TestSquare(cur + moveIn(k));
 
+  //
   for(auto & k : p)
-    if(k.back() == make_pair(rows - 1, cols - 1))
+    if(k.back() == goal)
       if(ret.empty() || ret.size() > k.size())
         ret = k;
 
@@ -204,9 +186,33 @@ path DFS_model::DFS_TestSquare(point cur) {
 //
 ////////////////////////////////////////////////////////////////////////
 
+class BFS_model: private Search {
+private:
+  path BFS_TestSquare(point cur);
+  path Found(point);
+public:
+  BFS_model() = default;
+  BFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
+  path Start();
+};
+
 path solve_bfs(Maze& m, int rows, int cols)
 {
-    return list<point>();
+  BFS_model solve(m, rows, cols);
+  return solve.Start();
+}
+
+path BFS_model::Start() {
+  return BFS_TestSquare(make_pair(0,0));
+}
+
+path BFS_model::BFS_TestSquare(point cur) {
+
+  for(int k = 0; k < 4; ++k)
+    if(obstacle->can_go(k, cur.first, cur.second))
+      Found(cur + moveIn(k));
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////
