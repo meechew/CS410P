@@ -217,20 +217,15 @@ path BFS_model::BFS_Search(){
 
     for(auto k : routes) {
       tmp = BFS_TestSquare(k.back());
-      if(tmp.size() == 1 ) {
-        k.push_back(tmp.back());
+      for(auto t : tmp) {
         pile.push_back(k);
-      }
-      else {
-        for(auto t : tmp) {
-          pile.push_back(k);
-          pile.back().push_back(t);
-        }
+        pile.back().push_back(t);
       }
       tmp.clear();
     }
 
     routes = pile;
+    pile.clear();
 
     for (auto k : routes)
       if (k.back() == goal)
