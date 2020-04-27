@@ -140,7 +140,7 @@ bool Search::CourseCK(point cur, int dir) {
 
 class DFS_model: private Search {
 private:
-  path DFS_TestSquare(point cur);
+  path DFS_Search(point cur);
 public:
   DFS_model() = default;
   DFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
@@ -154,10 +154,10 @@ path solve_dfs(Maze& m, int rows, int cols)
 }
 
 path DFS_model::Start() {
-  return DFS_TestSquare(make_pair(0,0));
+  return DFS_Search(make_pair(0, 0));
 }
 
-path DFS_model::DFS_TestSquare(point cur) {
+path DFS_model::DFS_Search(point cur) {
   if(cur == goal)
     return path(1, cur);
   course.push_front(cur);
@@ -167,7 +167,7 @@ path DFS_model::DFS_TestSquare(point cur) {
   for(int k = 0; k < 4; ++k)
     if(obstacle->can_go(k, cur.first, cur.second))
       if(!CourseCK(cur, k))
-        p[k] = DFS_TestSquare(cur + moveIn(k));
+        p[k] = DFS_Search(cur + moveIn(k));
 
   //
   for(auto & k : p)
@@ -189,7 +189,8 @@ path DFS_model::DFS_TestSquare(point cur) {
 class BFS_model: private Search {
 private:
   path BFS_TestSquare(point cur);
-  path Found(point);
+  path BFS_Search();
+  list<path> routes;
 public:
   BFS_model() = default;
   BFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
@@ -203,16 +204,52 @@ path solve_bfs(Maze& m, int rows, int cols)
 }
 
 path BFS_model::Start() {
-  return BFS_TestSquare(make_pair(0,0));
+  course.push_front(make_pair(0,0));
+  routes.push_front(course);
+  return BFS_Search();
 }
 
+path BFS_model::BFS_Search(){
+  path tmp;
+  list<path> pile;
+
+  while (course.size() <= (rows * cols)) {
+
+    for(auto k : routes) {
+      tmp = BFS_TestSquare(k.back());
+      if(tmp.size() == 1 ) {
+        k.push_back(tmp.back());
+        pile.push_back(k);
+      }
+      else {
+        for(auto t : tmp) {
+          pile.push_back(k);
+          pile.back().push_back(t);
+        }
+      }
+      tmp.clear();
+    }
+
+    routes = pile;
+
+    for (auto k : routes)
+      if (k.back() == goal)
+        return k;
+  }
+}
+
+
 path BFS_model::BFS_TestSquare(point cur) {
+  course.push_back(cur);
+  path tmp;
 
-  for(int k = 0; k < 4; ++k)
-    if(obstacle->can_go(k, cur.first, cur.second))
-      Found(cur + moveIn(k));
+  for (int k = 0; k < 4; ++k)
+    if (obstacle->can_go(k, cur.first, cur.second))
+      if (!CourseCK(cur, k))
+        tmp.push_back(cur + moveIn(k));
 
 
+  return tmp;
 }
 
 ////////////////////////////////////////////////////////////////////////
