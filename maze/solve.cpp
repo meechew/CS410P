@@ -213,7 +213,7 @@ path BFS_model::BFS_Search(){
   path tmp;
   list<path> pile;
 
-  while (course.size() <= (rows * cols)) {
+  while (true) {
 
     for(auto k : routes) {
       tmp = BFS_TestSquare(k.back());
@@ -253,9 +253,25 @@ path BFS_model::BFS_TestSquare(point cur) {
 //
 ////////////////////////////////////////////////////////////////////////
 
+class DJK_model: private Search {
+private:
+  path BFS_TestSquare(point cur);
+  path DJK_Search();
+  list<path> routes;
+public:
+  DJK_model() = default;
+  DJK_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
+  path Start();
+};
+
 path solve_dijkstra(Maze& m, int rows, int cols)
 {
-    return list<point>();
+  DJK_model solve(m, rows, cols);
+  return solve.Start();
+}
+
+path DJK_model::Start() {
+  return DJK_Search();
 }
 
 path solve_tour(Maze& m, int rows, int cols)
