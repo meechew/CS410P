@@ -238,7 +238,6 @@ path BFS_model::Start() {
 path BFS_model::BFS_Search(){
   course.push_front(make_pair(0,0));
   routes.push_front(course);
-  // These place holders could probably be removed if I Have time.
   path tmp;                   // When a path forks tmp is all the
                               // points used to affix the end
                               // of each path.
@@ -283,7 +282,10 @@ path BFS_model::TestSquare(point cur) {
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Dijkstra's algorithm
+// Dijkstra's algorithm searches through all the connected points for
+// the least costly path to connect. This implementation spiders out
+// till it finds the goal and returns the first path to make that
+// connection.
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -310,6 +312,9 @@ public:
   path Start() override;
 };
 
+// CompWP compares the weight of an edge for the swap function.
+// The basis for this implemntation can be found at:
+// http://www.cplusplus.com/reference/list/list/swap/
 bool DJK_model::CompWP(WeightedPath first , WeightedPath second) {
   return (first.Weight < second.Weight);
 }
@@ -325,6 +330,9 @@ path DJK_model::Start() {
   return DJK_Search();
 }
 
+// The DJK_Search will keep looping attempting to attach new points
+// until it finds the goal. cur represents the must recent eadge added,
+// and graph is the list of all the known paths.
 path DJK_model::DJK_Search() {
   point cur(0, 0);
   course.push_front(cur);
@@ -341,6 +349,8 @@ path DJK_model::DJK_Search() {
   }
 }
 
+// like with other usese of this function it searches for new points to ad to the
+// path, but in this case it ads new ones to the cue and sorts the cue by weight
 path DJK_model::TestSquare(point cur) {
   course.push_back(cur);
   course.unique();
@@ -355,6 +365,10 @@ path DJK_model::TestSquare(point cur) {
   return path();
 }
 
+// Attaches new points the the graph. It creats forks a path if in the middle
+// other wise it just exstend the end of a known path. There was some trouble
+// becuase the new paths were not being attched to the graph. That may have
+// been the reason moveIn() was giving weird resuslts. 
 point DJK_model::attach() {
   int mk;
   path tmp;
