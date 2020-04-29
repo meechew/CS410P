@@ -302,6 +302,7 @@ private:
   list<path> graph;
   point attach();
   static bool CompWP(WeightedPath first , WeightedPath second);
+  static point MoveTo(point p, int dir);
 public:
   DJK_model() = default;
   DJK_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
@@ -347,7 +348,7 @@ path DJK_model::TestSquare(point cur) {
     if (obstacle->can_go(k, cur.first, cur.second))
       if (!CourseCK(cur, k))
         cue.emplace_back(obstacle->cost(cur,k),
-            cur, cur + moveIn(k));
+            cur, MoveTo(cur,k));
 
   cue.sort(CompWP);
   return path();
@@ -379,6 +380,17 @@ point DJK_model::attach() {
     }
   }
   return point();
+}
+
+point DJK_model::MoveTo(point p, int dir) {
+  switch(dir)
+  {
+    case UP:    return make_pair(p.first - 1, p.second);
+    case LEFT:  return make_pair(p.first,p.second - 1);
+    case DOWN:  return make_pair(p.first + 1,p.second);
+    case RIGHT: return make_pair(p.first,p.second + 1);
+  }
+  return make_pair(-1,-1);
 }
 
 path solve_tour(Maze& m, int rows, int cols)
