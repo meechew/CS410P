@@ -303,6 +303,7 @@ private:
   point attach();
   static bool CompWP(WeightedPath first , WeightedPath second);
   static point MoveTo(point p, int dir);
+  int Messure(point p, int dir);
 public:
   DJK_model() = default;
   DJK_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
@@ -347,7 +348,7 @@ path DJK_model::TestSquare(point cur) {
   for (int k = 0; k < 4; ++k)
     if (obstacle->can_go(k, cur.first, cur.second))
       if (!CourseCK(cur, k))
-        cue.emplace_back(obstacle->cost(cur,k),
+        cue.emplace_back(Messure(cur,k),
             cur, MoveTo(cur,k));
 
   cue.sort(CompWP);
@@ -362,26 +363,24 @@ point DJK_model::attach() {
     mk = 0;
     for(auto Points: Paths) {
       mk++;
-      if(cue.front().Source == Points)
-        if(Points == Paths.back()) {
-          Paths.push_back(cue.front().Dest);
-          ret = cue.front().Dest;
-          cue.pop_front();
-          return ret;
-        }
-        else {
-          tmp = Paths;
-          tmp.resize(mk);
-          tmp.push_back(cue.front().Dest);
-          ret = cue.front().Dest;
-          cue.pop_front();
-          return ret;
+      if(cue.front().Source == Points) {
+	tmp = Paths;
+	if(cue.front().Source == Paths.back())
+	  graph.remove(Paths);
+	tmp.resize(mk);
+	tmp.push_back(cue.front().Dest);
+	graph.push_back(tmp);
+	ret = cue.front().Dest;
+	cue.pop_front();
+	return ret;
         }
     }
   }
   return point();
 }
 
+
+// This was added because moveIn keept retuning weird values
 point DJK_model::MoveTo(point p, int dir) {
   switch(dir)
   {
@@ -391,6 +390,11 @@ point DJK_model::MoveTo(point p, int dir) {
     case RIGHT: return make_pair(p.first,p.second + 1);
   }
   return make_pair(-1,-1);
+}
+
+// This was added because moveIn keept retuning weird values
+int DJK_model::Messure(point p, int dir) {
+  return obstacle->cost(p, dir);
 }
 
 path solve_tour(Maze& m, int rows, int cols)
