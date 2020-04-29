@@ -324,8 +324,9 @@ path DJK_model::Start() {
 }
 
 path DJK_model::DJK_Search() {
-  course.push_front(make_pair(0,0));
-  point cur;
+  point cur(0, 0);
+  course.push_front(cur);
+  graph.push_front(course);
 
   while(true) {
     TestSquare(cur);
@@ -340,6 +341,7 @@ path DJK_model::DJK_Search() {
 
 path DJK_model::TestSquare(point cur) {
   course.push_back(cur);
+  course.unique();
 
   for (int k = 0; k < 4; ++k)
     if (obstacle->can_go(k, cur.first, cur.second))
@@ -352,11 +354,13 @@ path DJK_model::TestSquare(point cur) {
 }
 
 point DJK_model::attach() {
-  int k = 0;
+  int mk;
   path tmp;
   point ret;
   for(auto Paths: graph) {
+    mk = 0;
     for(auto Points: Paths) {
+      mk++;
       if(cue.front().Source == Points)
         if(Points == Paths.back()) {
           Paths.push_back(cue.front().Dest);
@@ -366,7 +370,7 @@ point DJK_model::attach() {
         }
         else {
           tmp = Paths;
-          tmp.resize(k);
+          tmp.resize(mk);
           tmp.push_back(cue.front().Dest);
           ret = cue.front().Dest;
           cue.pop_front();

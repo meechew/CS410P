@@ -1,8 +1,8 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include <utility>
-#include <list>
+#include<utility>
+#include<list>
 
 using namespace std;
 
@@ -17,6 +17,10 @@ const int DOWN  = 2;
 const int RIGHT = 3;
 const int FAIL  = 4;
 
+inline point operator+(const point& l, const point& r) {
+    return make_pair(l.first+r.first, l.second+r.second);
+}
+
 inline int opposite(const int dir)
 {
     switch(dir)
@@ -29,7 +33,7 @@ inline int opposite(const int dir)
     return FAIL;
 }
 
-inline point moveIn(const int dir)
+inline const point moveIn(const int dir)
 {
     switch(dir)
     {
@@ -39,10 +43,6 @@ inline point moveIn(const int dir)
         case RIGHT: return make_pair(0,1);
     }
     return make_pair(-1,-1);
-}
-
-inline point operator+(const point& l, const point& r) {
-  return make_pair(l.first+r.first, l.second+r.second);
 }
 
 inline int direction(const point& p1, const point& p2)

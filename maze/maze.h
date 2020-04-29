@@ -5,7 +5,7 @@
 #include "path.h"
 #include <vector>
 #include <iostream>
-#include <random>
+#include<random>
 
 class Maze
 {
