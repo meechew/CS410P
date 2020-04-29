@@ -107,17 +107,26 @@ int main(int argc, char** argv)
     }
 }
 
+////////////////////////////////////////////////////////////////////////
+//
+// Base search class
+//
+// This is the base class. It provides a basic form for the search
+// algorythems. Goal is the destonation point. Course represents all the
+// points that have beem searched. CourseCK() ckecks if a point has
+// alread been passed through
+//
+////////////////////////////////////////////////////////////////////////
+
 
 class Search {
 protected:
   Maze* obstacle;
-  int rows;
-  int cols;
   point goal;
   path course;
   bool CourseCK(point, int dir);
 public:
-  Search(Maze &m, int c, int r): obstacle(&m), rows(r), cols(c) {
+  Search(Maze &m, int c, int r): obstacle(&m) {
     goal = make_pair(r - 1, c - 1);
   }
 
@@ -135,6 +144,11 @@ bool Search::CourseCK(point cur, int dir) {
 ////////////////////////////////////////////////////////////////////////
 //
 // Depth first
+//
+// Depth first search class is a search class. This algorythem
+// recurrsivly calls searches all the way till all paths have been
+// established. On the return paths are compared to check for the
+// shortest.
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -163,13 +177,13 @@ path DFS_model::DFS_Search(point cur) {
   course.push_front(cur);
   path p[4], ret;
 
-  //
+  // intiat a new recurrsive search for each dirrection
   for(int k = 0; k < 4; ++k)
     if(obstacle->can_go(k, cur.first, cur.second))
       if(!CourseCK(cur, k))
         p[k] = DFS_Search(cur + moveIn(k));
 
-  //
+  // compare all paths for onse that ended in the goal and shortest
   for(auto & k : p)
     if(k.back() == goal)
       if(ret.empty() || ret.size() > k.size())
