@@ -112,9 +112,9 @@ int main(int argc, char** argv)
 // Base search class
 //
 // This is the base class. It provides a basic form for the search
-// algorythems. Goal is the destonation point. Course represents all the
-// points that have beem searched. CourseCK() ckecks if a point has
-// alread been passed through
+// algorithms. Goal is the destination point. Course represents all the
+// points that have been searched. CourseCK() checks if a point has
+// already been passed through.
 //
 ////////////////////////////////////////////////////////////////////////
 
@@ -125,10 +125,13 @@ protected:
   point goal;
   path course;
   bool CourseCK(point, int dir);
+  virtual path TestSquare(point cur) = 0;
 public:
   Search(Maze &m, int c, int r): obstacle(&m) {
     goal = make_pair(r - 1, c - 1);
   }
+
+  Search() = default;
 
   virtual path Start() = 0;
 };
@@ -145,8 +148,8 @@ bool Search::CourseCK(point cur, int dir) {
 //
 // Depth first
 //
-// Depth first search class is a search class. This algorythem
-// recurrsivly calls searches all the way till all paths have been
+// Depth first search class is a search class. This algorithm
+// recursively calls searches all the way till all paths have been
 // established. On the return paths are compared to check for the
 // shortest.
 //
@@ -155,10 +158,12 @@ bool Search::CourseCK(point cur, int dir) {
 class DFS_model: private Search {
 private:
   path DFS_Search(point cur);
+  path TestSquare(point cur) override;
 public:
   DFS_model() = default;
   DFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
   path Start() override;
+
 };
 
 path solve_dfs(Maze& m, int rows, int cols)
@@ -177,13 +182,13 @@ path DFS_model::DFS_Search(point cur) {
   course.push_front(cur);
   path p[4], ret;
 
-  // intiat a new recurrsive search for each dirrection
+  // initiate a new recursive search for each direction
   for(int k = 0; k < 4; ++k)
     if(obstacle->can_go(k, cur.first, cur.second))
       if(!CourseCK(cur, k))
         p[k] = DFS_Search(cur + moveIn(k));
 
-  // compare all paths for onse that ended in the goal and shortest
+  // compare all paths for once that ended in the goal and shortest
   for(auto & k : p)
     if(k.back() == goal)
       if(ret.empty() || ret.size() > k.size())
@@ -194,21 +199,30 @@ path DFS_model::DFS_Search(point cur) {
   return ret;
 }
 
+path DFS_model::TestSquare(point cur) {
+  return path();
+}
+
 ////////////////////////////////////////////////////////////////////////
 //
 // Breadth first
+//
+// Breadth first search checks each point as it moves out from the
+// origin. The first path to reach the goal is returned. The end of each
+// route will be tested for the next point and forks will spawn a second
+// route.
 //
 ////////////////////////////////////////////////////////////////////////
 
 class BFS_model: private Search {
 private:
-  path BFS_TestSquare(point cur);
+  path TestSquare(point cur) override;
   path BFS_Search();
   list<path> routes;
 public:
   BFS_model() = default;
   BFS_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
-  path Start();
+  path Start() override;
 };
 
 path solve_bfs(Maze& m, int rows, int cols)
@@ -218,19 +232,22 @@ path solve_bfs(Maze& m, int rows, int cols)
 }
 
 path BFS_model::Start() {
-  course.push_front(make_pair(0,0));
-  routes.push_front(course);
   return BFS_Search();
 }
 
 path BFS_model::BFS_Search(){
-  path tmp;
-  list<path> pile;
+  course.push_front(make_pair(0,0));
+  routes.push_front(course);
+  // These place holders could probably be removed if I Have time.
+  path tmp;                   // When a path forks tmp is all the
+                              // points used to affix the end
+                              // of each path.
+  list<path> pile;            // All the paths get thrown into pile.
 
-  while (true) {
+  while(true) {
 
     for(auto k : routes) {
-      tmp = BFS_TestSquare(k.back());
+      tmp = TestSquare(k.back());
       for(auto t : tmp) {
         pile.push_back(k);
         pile.back().push_back(t);
@@ -238,17 +255,20 @@ path BFS_model::BFS_Search(){
       tmp.clear();
     }
 
+    // After all the routes have been built and collected they get
+    // put back into the routes variable.
     routes = pile;
     pile.clear();
 
+    // All routes are checked for the goal, then start all over again.
     for (auto k : routes)
       if (k.back() == goal)
         return k;
   }
 }
 
-
-path BFS_model::BFS_TestSquare(point cur) {
+// tests a point for successive points to add to routes
+path BFS_model::TestSquare(point cur) {
   course.push_back(cur);
   path tmp;
 
@@ -269,14 +289,29 @@ path BFS_model::BFS_TestSquare(point cur) {
 
 class DJK_model: private Search {
 private:
-  path BFS_TestSquare(point cur);
   path DJK_Search();
-  list<path> routes;
+  path TestSquare(point cur) override;
+  struct WeightedPath {
+    int Weight;
+    point Source;
+    point Dest;
+    WeightedPath(int w, point s, point d): Weight(w),
+      Source(s), Dest(d) {}
+  };
+  list<WeightedPath> cue;
+  list<path> graph;
+  point attach();
+  static bool CompWP(WeightedPath first , WeightedPath second);
 public:
   DJK_model() = default;
   DJK_model(Maze& m, int rows, int cols): Search(m, rows, cols) {}
-  path Start();
+  path Start() override;
 };
+
+bool DJK_model::CompWP(WeightedPath first , WeightedPath second) {
+  return (first.Weight < second.Weight);
+}
+
 
 path solve_dijkstra(Maze& m, int rows, int cols)
 {
@@ -288,9 +323,61 @@ path DJK_model::Start() {
   return DJK_Search();
 }
 
+path DJK_model::DJK_Search() {
+  course.push_front(make_pair(0,0));
+  point cur;
+
+  while(true) {
+    TestSquare(cur);
+
+    cur = attach();
+
+    for(auto k: graph)
+      if(k.back() == goal)
+        return k;
+  }
+}
+
+path DJK_model::TestSquare(point cur) {
+  course.push_back(cur);
+
+  for (int k = 0; k < 4; ++k)
+    if (obstacle->can_go(k, cur.first, cur.second))
+      if (!CourseCK(cur, k))
+        cue.emplace_back(obstacle->cost(cur,k),
+            cur, cur + moveIn(k));
+
+  cue.sort(CompWP);
+  return path();
+}
+
+point DJK_model::attach() {
+  int k = 0;
+  path tmp;
+  point ret;
+  for(auto Paths: graph) {
+    for(auto Points: Paths) {
+      if(cue.front().Source == Points)
+        if(Points == Paths.back()) {
+          Paths.push_back(cue.front().Dest);
+          ret = cue.front().Dest;
+          cue.pop_front();
+          return ret;
+        }
+        else {
+          tmp = Paths;
+          tmp.resize(k);
+          tmp.push_back(cue.front().Dest);
+          ret = cue.front().Dest;
+          cue.pop_front();
+          return ret;
+        }
+    }
+  }
+  return point();
+}
+
 path solve_tour(Maze& m, int rows, int cols)
 {
     return list<point>();
 }
-
-
