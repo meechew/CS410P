@@ -37,34 +37,34 @@ using rule = pair<term_ptr<T>, term_ptr<T>>;
 
 variable_ptr<bool> var(string n)
 {
-    return make_shared<variable<bool>>(variable<bool>(n));
+  return make_shared<variable<bool>>(variable<bool>(n));
 }
 literal_ptr<bool> lit(bool b)
 {
-    return make_shared<literal<bool>>(literal<bool>(b));
+  return make_shared<literal<bool>>(literal<bool>(b));
 }
 function_ptr<bool> fun(string n, vector<term_ptr<bool>> k)
 {
-    return make_shared<function<bool>>(function<bool>(n, k.size(), k));
+  return make_shared<function<bool>>(function<bool>(n, k.size(), k));
 }
 
 
 //functions
 function_ptr<bool> tand(term_ptr<bool> x, term_ptr<bool> y)
 {
-    return fun("and", {x,y});
+  return fun("and", {x,y});
 }
 function_ptr<bool> tor(term_ptr<bool> x, term_ptr<bool> y)
 {
-    return fun("or", {x,y});
+  return fun("or", {x,y});
 }
 function_ptr<bool> tnot(term_ptr<bool> x)
 {
-    return fun("not",{x});
+  return fun("not",{x});
 }
 function_ptr<bool> to(term_ptr<bool> x, term_ptr<bool> y)
 {
-    return fun("->",{x,y});
+  return fun("->",{x,y});
 }
 
 
@@ -80,8 +80,8 @@ rule<bool> contra(to(var("a"), lit(false)), tnot(var("a")));
 
 int main()
 {
-    // (!(a \/ a) /\ !true) -> false
-    term_ptr<bool> example = to(tand(tnot(tor(var("x"), var("x"))), tnot(lit(true))), lit(false));
+  // (!(a \/ a) /\ !true) -> false
+  term_ptr<bool> example = to(tand(tnot(tor(var("x"), var("x"))), tnot(lit(true))), lit(false));
 
-    cout << *example << endl;
+  cout << *example << endl;
 }

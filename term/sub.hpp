@@ -25,32 +25,32 @@ using term_ptr = std::shared_ptr<term<T>>;
 template<typename T>
 class Sub
 {
-    std::unordered_map<std::string, term_ptr<T>> _map;
+  std::unordered_map<std::string, term_ptr<T>> _map;
 
 public:
-    term<T>& operator()(std::string s) const
-    {
-        return *_map.at(s);
-    }
+  term<T>& operator()(std::string s) const
+  {
+    return *_map.at(s);
+  }
 
-    bool contains(std::string s) const
-    {
-        return _map.find(s) != _map.end();
-    }
-    void extend(std::string s, term_ptr<T> t)
-    {
-        _map[s] = t;
-    }
+  bool contains(std::string s) const
+  {
+    return _map.find(s) != _map.end();
+  }
+  void extend(std::string s, term_ptr<T> t)
+  {
+    _map[s] = t;
+  }
 
-    // print the substitution so I can verify that unify works
-    void print() const
+  // print the substitution so I can verify that unify works
+  void print() const
+  {
+    std::cout << "[" << std::endl;
+    for(std::pair<std::string, term_ptr<T>> p : _map)
     {
-        std::cout << "[" << std::endl;
-        for(std::pair<std::string, term_ptr<T>> p : _map)
-        {
-            std::cout << p.first << " :-> " << *p.second << std::endl;
-        }
-        std::cout << "]" << std::endl;
+      std::cout << p.first << " :-> " << *p.second << std::endl;
     }
+    std::cout << "]" << std::endl;
+  }
 };
 #endif // SUB_HPP
