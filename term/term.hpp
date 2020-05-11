@@ -37,16 +37,36 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 /////////////////////////////////////////////////////////////////
 
 template<typename T>
-class term { };
+class term {
+private:
+
+public:
+
+};
 
 template<typename T>
-class variable : public term<T> { };
+class variable : public term<T> {
+private:
+
+public:
+
+};
 
 template<typename T>
-class literal : public term<T> { };
+class literal : public term<T> {
+private:
+
+public:
+
+};
 
 template<typename T>
-class function : public term<T> { };
+class function : public term<T> {
+private:
+
+public:
+
+};
 
 
 /////////////////////////////////////////////////////////////////
