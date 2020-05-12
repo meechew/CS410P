@@ -8,7 +8,6 @@
 #include<iostream>
 #include<exception>
 #include "sub.hpp"
-#include "term_iterator.hpp"
 
 /////////////////////////////////////////////////////////////////
 //
@@ -47,24 +46,43 @@ public:
 template<typename T>
 class variable : public term<T> {
 private:
-
+  std::string Var;
 public:
-
+  variable(){}
+  variable(std::string argv){
+    Var = argv;
+  }
+  void print(std::ostream &out){
+    out << Var;
+  }
 };
 
 template<typename T>
 class literal : public term<T> {
 private:
-
+  term<T> Val;
 public:
-
+  literal(){};
+  literal(T argv){
+    Val = argv;
+  }
+  void print(std::ostream &out){
+    out << Val;
+  }
 };
 
 template<typename T>
 class function : public term<T> {
 private:
-
+  term<T> Fun;
+  std::string Type;
+  int Argc;
+  std::vector<std::shared_ptr<term<T>>> Argv;
 public:
+  function(){};
+  function(std::string type, int argc, std::vector<std::shared_ptr<term<T>>> argv){
+
+  }
 
 };
 
@@ -112,6 +130,27 @@ template<typename T>
 std::ostream& operator<<(std::ostream& out, const term<T>& t)
 {
 }
+
+
+template<typename T>
+class term_iterator {
+private:
+  std::vector<std::shared_ptr<term<T>>> Pos;
+public:
+  term_iterator<T>() {}
+  term_iterator<T>(const term_iterator<T> &i): Pos(i.Pos) {}
+  term_iterator<T>(std::shared_ptr<term<T>> p) {
+    Pos.push_back(p);
+  }
+  T& operator*() const;
+  T* operator->() const;
+  term_iterator& operator++();
+  term_iterator& operator--();
+  term_iterator operator++(int);
+  term_iterator operator--(int);
+  term_iterator& operator+=(unsigned int);
+  term_iterator& operator-=(unsigned int);
+};
 
 
 #endif // TERM_HPP

@@ -3,12 +3,11 @@
 
 #ifndef TERM_TERM_ITERATOR_HPP
 #define TERM_TERM_ITERATOR_HPP
-#include "term.hpp"
 
 template<typename T>
 class term_iterator {
 private:
-  Val<T>* Pos;
+  term<T>* Pos;
 public:
   T& operator*() const;
   T* operator->() const;
