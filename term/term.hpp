@@ -36,18 +36,28 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 /////////////////////////////////////////////////////////////////
 
 template<typename T>
+struct node
+{
+  T value;
+  std::shared_ptr<node<T>> left = nullptr;
+  std::shared_ptr<node<T>> right = nullptr;
+  node<T>(T v) : value(v), left(nullptr), right(nullptr) {}
+  node<T>() = delete;
+};
+
+template<typename T>
 class term_iterator {
 private:
   std::vector<std::shared_ptr<term<T>>> Pos;
 public:
-  typedef term<T> T_Type;
-  typedef term<T> *T_Ptr;
-  typedef term<T> &T_Ref;
-  typedef size_t T_Size;
-  typedef ptrdiff_t  T_dif;
+  typedef T                               value_type;
+  typedef T*                              pointer;
+  typedef T&                              reference;
+  typedef size_t                          size_type;
+  typedef ptrdiff_t                       difference_type;
   typedef std::bidirectional_iterator_tag iterator_category;
-
-  term_iterator<T>() = delete;
+  
+  term_iterator<T>() {};
   term_iterator<T>(const term_iterator<T> &i): Pos(i.Pos) {}
   term_iterator<T>(std::shared_ptr<term<T>> p) {
     Pos.push_back(p);
@@ -59,8 +69,20 @@ public:
   T* operator->() const {
     return &Pos.front()->value;
   }
-  term_iterator& operator++();
-  term_iterator& operator--();
+
+  term_iterator& operator++() {
+    if(Pos.empty())
+      return *this;
+    std::vector<int>::iterator it = Pos.begin();
+    return ++it;
+  }
+
+  term_iterator& operator--() {
+    if(Pos.empty())
+      return *this;
+    std::vector<int>::iterator it = Pos.end();
+    return --it;
+  }
 
   term_iterator operator++(int){
     term_iterator<T> tmp(*this);
@@ -96,37 +118,17 @@ public:
 };
 
 template<typename T>
-term_iterator<T>& term_iterator<T>::operator++() {
-  if(!Pos.empty()){
-    std::vector<int>::iterator it = Pos.begin();
-    return ++it;
-  }
-  return NULL;
-}
-
-template<typename T>
-term_iterator<T>& term_iterator<T>::operator--() {
-  if(!Pos.empty()){
-    std::vector<int>::iterator it = Pos.end();
-    return --it;
-  }
-  return NULL;
-}
-
-
-
-template<typename T>
 class term {
 private:
-  typedef term<T> T_Type;
-  typedef term<T> *T_Ptr;
-  typedef term<T> &T_Ref;
-  typedef size_t T_Size;
-  typedef ptrdiff_t  T_dif;
-
-  typedef std::bidirectional_iterator_tag iterator_category;
-  typedef term_iterator<T> iterator;
-  typedef term_iterator<const T> const_iterator;
+  typedef T                                     value_type;
+  typedef T*                                    pointer;
+  typedef T&                                    reference;
+  typedef size_t                                size_type;
+  typedef ptrdiff_t                             difference_type;
+  
+  typedef std::bidirectional_iterator_tag       iterator_category;
+  typedef term_iterator<T>                      iterator;
+  typedef term_iterator<const T>                const_iterator;
 
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -136,8 +138,8 @@ public:
   term() {};
 
 
-  iterator begin() {return term_iterator<T>();}
-  iterator end() {return term_iterator<T>();}
+  iterator begin()          {return term_iterator<T>();}
+  iterator end()            {return term_iterator<T>();}
   const_iterator cbegin()   {return term_iterator<const T>();}
   const_iterator cend()     {return term_iterator<const T>();}
 
@@ -168,7 +170,7 @@ public:
 template<typename T>
 class literal : public term<T> {
 private:
-  term<T> Val;
+  T Val;
 public:
   literal(){};
   literal(T argv){
@@ -182,7 +184,7 @@ public:
 template<typename T>
 class function : public term<T> {
 private:
-  term<T> Fun;
+  T Fun;
   std::string Type;
   int Argc;
   std::vector<std::shared_ptr<term<T>>> Argv;
