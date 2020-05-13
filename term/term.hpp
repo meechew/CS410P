@@ -38,7 +38,16 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 template<typename T>
 class term {
 private:
+  typedef term<T> T_Type;
+  typedef term<T> *T_Ptr;
+  typedef term<T> &T_Ref;
+  typedef size_t T_Size;
+  typedef prtdiff_t T_dif;
+  
+  typedef term_iterator<T> iterator;
+  typedef term_iterator<const T> const_iterator;
 
+  std::ostream &operator<<(std::ostream &out);
 public:
 
 };
@@ -104,7 +113,7 @@ bool unify(const term<T>& t1, const term<T>& t2, Sub<T>& sigma)
 //
 /////////////////////////////////////////////////////////////////
 
-template<typename T>
+Template<typename T>
 term_ptr<T> reduce(term_ptr<T> t, const std::vector<rule<T>>& rules)
 {
 }
@@ -146,10 +155,31 @@ public:
   T* operator->() const;
   term_iterator& operator++();
   term_iterator& operator--();
-  term_iterator operator++(int);
-  term_iterator operator--(int);
-  term_iterator& operator+=(unsigned int);
-  term_iterator& operator-=(unsigned int);
+
+  term_iterator operator++(int){
+    tree_iterator<T> tmp(*this);
+    ++this;
+    return tmp;
+  }
+
+  term_iterator operator--(int) {
+    tree_iterator<T> tmp(*this);
+    --this;
+    return tmp;
+  }
+  
+
+  term_iterator& operator+=(unsigned int n) {
+    for(int i = 0; i < n; i++) --*this;
+    return *this;
+  }
+  
+  term_iterator& operator-=(unsigned int n) {
+    for(int i = 0; i < n; i++) ++*this;
+    return *this;
+  }
+
+
 };
 
 
