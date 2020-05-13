@@ -11,4 +11,4 @@ add_executable(term
         test_basic.cpp
         test_boolean.cpp
         test_display.cpp
-        test_polinomial.cpp)
+        test_polinomial.cpp term_iterator.hpp)
