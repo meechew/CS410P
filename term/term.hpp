@@ -4,7 +4,7 @@
 #include<memory>
 #include<vector>
 #include<string>
-#include<algorithm>
+#include<stack>
 #include<iostream>
 #include<exception>
 #include "sub.hpp"
@@ -38,51 +38,40 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 template<typename T>
 struct node
 {
-  T value;
+  T Value;
   std::shared_ptr<node<T>> left = nullptr;
   std::shared_ptr<node<T>> right = nullptr;
-  node<T>(T v) : value(v), left(nullptr), right(nullptr) {}
+  node<T>(T v) : Value(v), left(nullptr), right(nullptr) {}
   node<T>() = delete;
 };
+
+/////////////////////////////////////////////////////////////////
+//
+// iterator
+//
+/////////////////////////////////////////////////////////////////
 
 template<typename T>
 class term_iterator {
 private:
-  std::vector<std::shared_ptr<term<T>>> Pos;
+  std::stack<std::shared_ptr<node<T>>> Path;
+  std::shared_ptr<node<T>> Root;
 public:
-  typedef T                               value_type;
-  typedef T*                              pointer;
-  typedef T&                              reference;
+  typedef term<T>                         value_type;
+  typedef term<T>*                        pointer;
+  typedef term<T>&                        reference;
   typedef size_t                          size_type;
   typedef ptrdiff_t                       difference_type;
   typedef std::bidirectional_iterator_tag iterator_category;
   
-  term_iterator<T>() {};
-  term_iterator<T>(const term_iterator<T> &i): Pos(i.Pos) {}
-  term_iterator<T>(std::shared_ptr<term<T>> p) {
-    Pos.push_back(p);
-  }
-  T& operator*() const {
-    return Pos.front()->value;
-  }
+  term_iterator<T>() = delete;
+  term_iterator<T>(std::shared_ptr<node<T>> n, bool begin);
+  term_iterator<T>(const term_iterator<T>& i) : Path(i._path), Root(i.Root) {}
 
-  T* operator->() const {
-    return &Pos.front()->value;
-  }
-
-  term_iterator& operator++() {
-    if(Pos.empty())
-      return *this;
-    std::vector<int>::iterator it = Pos.begin();
-    return ++it;
-  }
-
-  term_iterator& operator--() {
-    if(Pos.empty())
-      return *this;
-    std::vector<int>::iterator it = Pos.end();
-    return --it;
-  }
+  term<T>& operator*() {return Path.top()->Value;}
+  term<T>* operator->() {return &Path.top()->Value;}
+  term_iterator& operator++();
+  term_iterator& operator--();
 
   term_iterator operator++(int){
     term_iterator<T> tmp(*this);
@@ -107,22 +96,98 @@ public:
   }
 
   bool operator==(const term_iterator<T>& Next) const
-  {
-    return Pos == Next.Pos;
-  }
-
+  {return Path == Next.Path;}
   bool operator!=(const term_iterator<T>& Next) const
-  {
-    return Pos != Next.Pos;
-  }
+  {return Path != Next.Path;}
 };
+
+template<typename T>
+term_iterator<T>::term_iterator(std::shared_ptr<node<T>> n, bool begin)
+{
+  Root = n;
+  if(begin)
+  {
+    for(; n->left; n = n->left)
+    {
+      Path.push(n);
+    }
+    Path.push(n);
+  }
+}
+
+template<typename T>
+term_iterator<T>& term_iterator<T>::operator++()
+{
+  if(!Path.empty())
+  {
+    if(Path.top()->right)
+    {
+      Path.push(Path.top()->right);
+      while(Path.top()->left)
+      {
+        Path.push(Path.top()->left);
+      }
+    }
+    else
+    {
+      std::shared_ptr<node<T>> child = Path.top();
+      Path.pop();
+      while(!Path.empty() && Path.top()->right == child)
+      {
+        child = Path.top();
+        Path.pop();
+      }
+    }
+  }
+  return *this;
+}
+
+template<typename T>
+term_iterator<T>& term_iterator<T>::operator--()
+{
+  if(!Path.empty())
+  {
+    if(Path.top()->left)
+    {
+      Path.push(Path.top()->left);
+      while(Path.top()->right)
+      {
+        Path.push(Path.top()->right);
+      }
+    }
+    else
+    {
+      std::shared_ptr<node<T>> child = Path.top();
+      Path.pop();
+      while(!Path.empty() && Path.top()->left == child)
+      {
+        child = Path.top();
+        Path.pop();
+      }
+    }
+  }
+  else
+  {
+    Path.push(Root);
+    while(Path.top()->right)
+    {
+      Path.push(Path.top()->right);
+    }
+  }
+  return *this;
+}
+/////////////////////////////////////////////////////////////////
+//
+// term
+//
+/////////////////////////////////////////////////////////////////
 
 template<typename T>
 class term {
 private:
-  typedef T                                     value_type;
-  typedef T*                                    pointer;
-  typedef T&                                    reference;
+  typedef term<T>                               value_type;
+  typedef term<T>*                              pointer;
+  typedef term<T>&                              reference;
   typedef size_t                                size_type;
   typedef ptrdiff_t                             difference_type;
   
@@ -133,10 +198,11 @@ private:
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+  std::shared_ptr<T> Elem = nullptr;
   std::ostream &operator<<(std::ostream &out);
+  std::shared_ptr<term<T>> InsertElem (const T &elem, std::shared_ptr<term<T>> pos);
 public:
-  term() {};
-
+  term() {Elem = nullptr;};
 
   iterator begin()          {return term_iterator<T>();}
   iterator end()            {return term_iterator<T>();}
@@ -151,7 +217,19 @@ public:
   {return std::reverse_iterator<const_iterator>(cbegin());}
 
   virtual void print(std::ostream &out) = 0;
+  void insert(const T &e)   {Elem = InsertElem(e, Elem);}
 };
+
+template<typename T>
+std::shared_ptr<term<T>> InsertElem(const T &elem, std::shared_ptr<term<T>> pos) {
+  if(!elem)
+    return std::make_shared<term<T>>(term<T>(elem));
+  if(elem < pos->Value)
+    pos->left = InsertElem(elem, pos->left);
+  if(elem < pos->Value)
+    pos->right = InsertElem(elem, pos->right);
+}
+
 
 template<typename T>
 class variable : public term<T> {
@@ -173,8 +251,8 @@ private:
   T Val;
 public:
   literal(){};
-  literal(T argv){
-    Val = argv;
+  literal(T v){
+    Val = v;
   }
   void print(std::ostream &out){
     out << Val;
@@ -184,10 +262,12 @@ public:
 template<typename T>
 class function : public term<T> {
 private:
-  T Fun;
+  T Value;
   std::string Type;
   int Argc;
   std::vector<std::shared_ptr<term<T>>> Argv;
+  std::shared_ptr<function<T>> left = nullptr;
+  std::shared_ptr<function<T>> right = nullptr;
 public:
   function(){};
   function(std::string type, int argc, std::vector<std::shared_ptr<term<T>>> argv)
@@ -196,7 +276,6 @@ public:
     out << Type;
   }
 };
-
 
 /////////////////////////////////////////////////////////////////
 //
