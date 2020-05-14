@@ -47,7 +47,6 @@ template<typename T>
 class term {
 private:
   std::shared_ptr<term<T>> Root = nullptr;
-  std::shared_ptr<term<T>> InsertElem(const T &elem, std::shared_ptr<term<T>> pos);
 public:
 
   typedef T                                     value_type;
@@ -79,8 +78,6 @@ public:
   const_reverse_iterator crend()
   {return std::reverse_iterator<const_iterator>(cbegin());};
 
-  void insert(const T &e)   {Root = InsertElem(e, Root);}
-
   std::ostream& operator<<(std::ostream &out) {return print(out);};
   virtual std::ostream& print(std::ostream &out) { return out;};
 
@@ -101,18 +98,6 @@ public:
     }
   }
 };
-
-template<typename T>
-std::shared_ptr<term<T>> term<T>::InsertElem(const T &elem, std::shared_ptr<term<T>> pos) {
-  if(!pos)
-    return std::make_shared<term<T>>(term<T>(elem));
-  if(elem < pos->Value)
-    pos->left = InsertElem(elem, pos->left);
-  if(elem < pos->Value)
-    pos->right = InsertElem(elem, pos->right);
-  return pos;
-}
-
 
 template<typename T>
 class variable : public term<T> {
