@@ -76,16 +76,16 @@ public:
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  term() {Root = make_shared<term<T>>(this);};
-  term(int argc, std::vector<std::shared_ptr<term<T>>> argv ) {
+  term() {Root = std::make_shared<term<T>>(this);}
+  term(int argc, std::vector<std::shared_ptr<term<T>>> argv) {
     switch (argc) {
       case 1:
-        left = make_shared<term<T>>(argv[0]);
+        left = std::make_shared<term<T>>(argv[0]);
         right = nullptr;
         return;
       case 2:
-        left = make_shared<term<T>>(argv[0]);
-        right = make_shared<term<T>>(argv[1]);
+        left = std::make_shared<term<T>>(argv[0]);
+        right = std::make_shared<term<T>>(argv[1]);
         return;
     }
   }
@@ -105,7 +105,7 @@ public:
   void insert(const T &e)   {Root = InsertElem(e, Root);}
 
   std::ostream& operator<<(std::ostream &out) {return print(out);};
-  virtual std::ostream& print(std::ostream &out) = 0;
+  virtual std::ostream& print(std::ostream &out);
 
   term<T>& GetRoot() {return *Root;}
   std::shared_ptr<term<T>> left = nullptr;
