@@ -37,19 +37,6 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 //
 /////////////////////////////////////////////////////////////////
 
-#ifndef NODE
-#define NODE
-template<typename T>
-struct node
-{
-  T Value;
-  std::shared_ptr<node<T>> left = nullptr;
-  std::shared_ptr<node<T>> right = nullptr;
-  node<T>(T v) : Value(v), left(nullptr), right(nullptr) {}
-  node<T>() = delete;
-};
-#endif
-
 /////////////////////////////////////////////////////////////////
 //
 // term
@@ -76,19 +63,9 @@ public:
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  term() {Root = std::make_shared<term<T>>(this);}
-  term(int argc, std::vector<std::shared_ptr<term<T>>> argv) {
-    switch (argc) {
-      case 1:
-        left = std::make_shared<term<T>>(argv[0]);
-        right = nullptr;
-        return;
-      case 2:
-        left = std::make_shared<term<T>>(argv[0]);
-        right = std::make_shared<term<T>>(argv[1]);
-        return;
-    }
-  }
+  term() {Root = std::shared_ptr<term<T>>(this);}
+  explicit term(term<T>*){}
+  explicit term(std::shared_ptr<term<T> >&) {}
 
   iterator begin()          {return term_iterator<T>(Root, true);}
   iterator end()            {return term_iterator<T>(Root, false);}
@@ -105,11 +82,24 @@ public:
   void insert(const T &e)   {Root = InsertElem(e, Root);}
 
   std::ostream& operator<<(std::ostream &out) {return print(out);};
-  virtual std::ostream& print(std::ostream &out);
+  virtual std::ostream& print(std::ostream &out) { return out;};
 
   term<T>& GetRoot() {return *Root;}
   std::shared_ptr<term<T>> left = nullptr;
   std::shared_ptr<term<T>> right = nullptr;
+
+  void AddChildren(int argc, std::vector<std::shared_ptr<term<T>>> argv) {
+    switch (argc) {
+      case 1:
+        left = argv.front();
+        right = nullptr;
+        return;
+      case 2:
+        left = argv.front();
+        right = argv.back();
+        return;
+    }
+  }
 };
 
 template<typename T>
@@ -134,8 +124,7 @@ public:
     Var = std::move(argv);
   }
 
-
-  std::ostream& print(std::ostream &out){
+  std::ostream& print(std::ostream &out) override {
     out << Var;
     return out;
   }
@@ -149,8 +138,7 @@ public:
   literal(){};
   literal(T v): Val(v){}
 
-
-  std::ostream& print(std::ostream &out){
+  std::ostream& print(std::ostream &out) override {
     out << Val;
     return out;
   }
@@ -166,10 +154,9 @@ private:
 public:
   function(){};
   function(std::string type, int argc, std::vector<std::shared_ptr<term<T>>> argv)
-  : Type(type), Argc(argc), Argv(argv), term<T>(argc,argv) {}
+  : Type(type), Argc(argc), Argv(argv) { term<T>::AddChildren(argc, argv); }
 
-
-  std::ostream& print(std::ostream &out) {
+  std::ostream& print(std::ostream &out) override {
     out << Type;
     return out;
   }

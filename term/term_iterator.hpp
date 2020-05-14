@@ -6,18 +6,6 @@
 #include<memory>
 #include<vector>
 #include<stack>
-#ifndef NODE
-#define NODE
-template<typename T>
-struct node
-{
-  T Value;
-  std::shared_ptr<node<T>> left = nullptr;
-  std::shared_ptr<node<T>> right = nullptr;
-  node<T>(T v) : Value(v), left(nullptr), right(nullptr) {}
-  node<T>() = delete;
-};
-#endif
 
 /////////////////////////////////////////////////////////////////
 //
@@ -41,9 +29,8 @@ public:
 
   term_iterator<T>() = delete;
   term_iterator<T>(std::shared_ptr<term<T>> n, bool begin);
-  term_iterator<T>(const term_iterator<T>& i) : Path(i.Path), Root(i.Root) {}
+  term_iterator<T>(const term_iterator<term<T>>& i) : Path(i.Path), Root(i.Root) {}
 
-  //Not sure why but the shared_ptr was returning term<T> not term<T>&
   term<T>& operator*() {return Path.top()->GetRoot();}
   term<T>* operator->() {return &Path.top()->GetRoot();}
   term_iterator& operator++();
