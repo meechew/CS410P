@@ -18,7 +18,7 @@ template<typename T>
 class term_iterator {
 private:
   std::stack<std::shared_ptr<term<T>>> Path;
-  std::shared_ptr<term<T>> Root;
+  term_ptr<T> Root = nullptr;
 public:
   typedef T                               value_type;
   typedef T*                              pointer;
@@ -28,7 +28,7 @@ public:
   typedef std::bidirectional_iterator_tag iterator_category;
 
   term_iterator<T>() = delete;
-  term_iterator<T>(std::shared_ptr<term<T>> n, bool begin);
+  term_iterator<T>(term_ptr<T> n, bool begin);
   term_iterator<T>(const term_iterator<term<T>>& i) : Path(i.Path), Root(i.Root) {}
 
   term<T>& operator*() {return Path.top()->GetRoot();}
@@ -65,7 +65,7 @@ public:
 };
 
 template<typename T>
-term_iterator<T>::term_iterator(std::shared_ptr<term<T>> n, bool begin)
+term_iterator<T>::term_iterator(term_ptr<T> n, bool begin)
 {
   Root = n;
   if(begin)
@@ -93,7 +93,7 @@ term_iterator<T>& term_iterator<T>::operator++()
     }
     else
     {
-      std::shared_ptr<term<T>> child = Path.top();
+      term_ptr<T> child = Path.top();
       Path.pop();
       while(!Path.empty() && Path.top()->right == child)
       {
@@ -120,7 +120,7 @@ term_iterator<T>& term_iterator<T>::operator--()
     }
     else
     {
-      std::shared_ptr<term<T>> child = Path.top();
+      term_ptr<T> child = Path.top();
       Path.pop();
       while(!Path.empty() && Path.top()->left == child)
       {

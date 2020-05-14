@@ -46,7 +46,7 @@ using rule = std::pair<term_ptr<T>, term_ptr<T>>;
 template<typename T>
 class term {
 private:
-  std::shared_ptr<term<T>> Root = nullptr;
+  term_ptr<T> Root = nullptr;
 public:
 
   typedef T                                     value_type;
@@ -62,9 +62,9 @@ public:
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  term() {Root = std::shared_ptr<term<T>>(this);}
-  explicit term(term<T>*){}
-  explicit term(std::shared_ptr<term<T> >&) {}
+  term(): left(nullptr), right(nullptr) {Root = std::shared_ptr<term<T>>(this);}
+  explicit term(term<T>*): left(nullptr), right(nullptr)  {}
+  explicit term(term_ptr<T>&): left(nullptr), right(nullptr)  {}
 
   iterator begin()          {return term_iterator<T>(Root, true);}
   iterator end()            {return term_iterator<T>(Root, false);}
@@ -82,10 +82,10 @@ public:
   virtual std::ostream& print(std::ostream &out) { return out;};
 
   term<T>& GetRoot() {return *Root;}
-  std::shared_ptr<term<T>> left = nullptr;
-  std::shared_ptr<term<T>> right = nullptr;
+  term_ptr<T> left = nullptr;
+  term_ptr<T> right = nullptr;
 
-  void AddChildren(int argc, std::vector<std::shared_ptr<term<T>>> argv) {
+  void AddChildren(int argc, std::vector<term_ptr<T>> argv) {
     switch (argc) {
       case 1:
         left = argv.front();
@@ -135,14 +135,16 @@ private:
   T Func;
   std::string Type;
   int Argc;
-  std::vector<std::shared_ptr<term<T>>> Argv;
+  std::vector<term_ptr<T>> Argv;
 public:
   function(){};
-  function(std::string type, int argc, std::vector<std::shared_ptr<term<T>>> argv)
+  function(std::string type, int argc, std::vector<term_ptr<T>> argv)
   : Type(type), Argc(argc), Argv(argv) { term<T>::AddChildren(argc, argv); }
 
   std::ostream& print(std::ostream &out) override {
-    out << Type;
+    if(term<T>::left) term<T>::left->print(out);
+    out << ' ' << Type << ' ';
+    if(term<T>::right) term<T>::right->print(out);
     return out;
   }
 };
