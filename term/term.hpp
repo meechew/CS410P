@@ -80,12 +80,12 @@ public:
   term(int argc, std::vector<std::shared_ptr<term<T>>> argv ) {
     switch (argc) {
       case 1:
-        term<T>::left = make_shared<term<T>>(argv[0]);
-        term<T>::right = nullptr;
+        left = make_shared<term<T>>(argv[0]);
+        right = nullptr;
         return;
       case 2:
-        term<T>::left = make_shared<term<T>>(argv[0]);
-        term<T>::right = make_shared<term<T>>(argv[1]);
+        left = make_shared<term<T>>(argv[0]);
+        right = make_shared<term<T>>(argv[1]);
         return;
     }
   }
