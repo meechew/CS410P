@@ -2,6 +2,7 @@
 #define TERM_HPP
 
 #include<memory>
+#include <utility>
 #include<vector>
 #include<string>
 #include<stack>
@@ -58,8 +59,8 @@ struct node
 template<typename T>
 class term {
 private:
-  std::shared_ptr<node<T>> Root = nullptr;
-  std::shared_ptr<node<T>> InsertElem(const T &elem, std::shared_ptr<term<T>> pos);
+  std::shared_ptr<term<T>> Root = nullptr;
+  std::shared_ptr<term<T>> InsertElem(const T &elem, std::shared_ptr<term<T>> pos);
 public:
 
   typedef T                                     value_type;
@@ -75,7 +76,19 @@ public:
   typedef std::reverse_iterator<iterator>       reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  term() {Root = nullptr;};
+  term() {Root = make_shared<term<T>>(this);};
+  term(int argc, std::vector<std::shared_ptr<term<T>>> argv ) {
+    switch (argc) {
+      case 1:
+        term<T>::left = make_shared<term<T>>(argv[0]);
+        term<T>::right = nullptr;
+        return;
+      case 2:
+        term<T>::left = make_shared<term<T>>(argv[0]);
+        term<T>::right = make_shared<term<T>>(argv[1]);
+        return;
+    }
+  }
 
   iterator begin()          {return term_iterator<T>(Root, true);}
   iterator end()            {return term_iterator<T>(Root, false);}
@@ -89,13 +102,18 @@ public:
   const_reverse_iterator crend()
   {return std::reverse_iterator<const_iterator>(cbegin());};
 
+  void insert(const T &e)   {Root = InsertElem(e, Root);}
+
   std::ostream& operator<<(std::ostream &out) {return print(out);};
   virtual std::ostream& print(std::ostream &out) = 0;
-  void insert(const T &e)   {Root = InsertElem(e, Root);}
+
+  term<T>& GetRoot() {return *Root;}
+  std::shared_ptr<term<T>> left = nullptr;
+  std::shared_ptr<term<T>> right = nullptr;
 };
 
 template<typename T>
-std::shared_ptr<node<T>> term<T>::InsertElem(const T &elem, std::shared_ptr<term<T>> pos) {
+std::shared_ptr<term<T>> term<T>::InsertElem(const T &elem, std::shared_ptr<term<T>> pos) {
   if(!pos)
     return std::make_shared<term<T>>(term<T>(elem));
   if(elem < pos->Value)
@@ -113,8 +131,10 @@ private:
 public:
   variable(){}
   variable(std::string argv){
-    Var = argv;
+    Var = std::move(argv);
   }
+
+
   std::ostream& print(std::ostream &out){
     out << Var;
     return out;
@@ -127,9 +147,9 @@ private:
   T Val;
 public:
   literal(){};
-  literal(T v){
-    Val = v;
-  }
+  literal(T v): Val(v){}
+
+
   std::ostream& print(std::ostream &out){
     out << Val;
     return out;
@@ -139,16 +159,16 @@ public:
 template<typename T>
 class function : public term<T> {
 private:
-  T Value;
+  T Func;
   std::string Type;
   int Argc;
   std::vector<std::shared_ptr<term<T>>> Argv;
-  std::shared_ptr<function<T>> left = nullptr;
-  std::shared_ptr<function<T>> right = nullptr;
 public:
   function(){};
   function(std::string type, int argc, std::vector<std::shared_ptr<term<T>>> argv)
-  : Type(type), Argc(argc), Argv(argv){}
+  : Type(type), Argc(argc), Argv(argv), term<T>(argc,argv) {}
+
+
   std::ostream& print(std::ostream &out) {
     out << Type;
     return out;
@@ -198,9 +218,9 @@ term_ptr<T> rewrite(term_ptr<T> t, term<T>& rhs, std::vector<int> path, const Su
 /////////////////////////////////////////////////////////////////
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const term<T>& t)
+std::ostream& operator<<(std::ostream& out, term<T>& t)
 {
-  return out << t;
+  return t.print(out);
 }
 
 #endif // TERM_HPP

@@ -9,6 +9,7 @@ add_executable(term
         term.hpp
         sub.hpp
         test_basic.cpp
-        test_boolean.cpp
-        test_display.cpp
-        test_polinomial.cpp term_iterator.hpp)
+        #test_boolean.cpp
+        #test_display.cpp
+        #test_polinomial.cpp
+        term_iterator.hpp)

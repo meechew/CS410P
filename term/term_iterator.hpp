@@ -29,8 +29,8 @@ struct node
 template<typename T>
 class term_iterator {
 private:
-  std::stack<std::shared_ptr<node<T>>> Path;
-  std::shared_ptr<node<T>> Root;
+  std::stack<std::shared_ptr<term<T>>> Path;
+  std::shared_ptr<term<T>> Root;
 public:
   typedef T                               value_type;
   typedef T*                              pointer;
@@ -40,12 +40,12 @@ public:
   typedef std::bidirectional_iterator_tag iterator_category;
 
   term_iterator<T>() = delete;
-  term_iterator<T>(std::shared_ptr<node<T>> n, bool begin);
+  term_iterator<T>(std::shared_ptr<term<T>> n, bool begin);
   term_iterator<T>(const term_iterator<T>& i) : Path(i.Path), Root(i.Root) {}
 
   //Not sure why but the shared_ptr was returning term<T> not term<T>&
-  term<T>& operator*() {return (term<T>&)Path.top()->Value;}
-  term<T>* operator->() {return &Path.top()->Value;}
+  term<T>& operator*() {return Path.top()->GetRoot();}
+  term<T>* operator->() {return &Path.top()->GetRoot();}
   term_iterator& operator++();
   term_iterator& operator--();
 
@@ -78,7 +78,7 @@ public:
 };
 
 template<typename T>
-term_iterator<T>::term_iterator(std::shared_ptr<node<T>> n, bool begin)
+term_iterator<T>::term_iterator(std::shared_ptr<term<T>> n, bool begin)
 {
   Root = n;
   if(begin)
@@ -106,7 +106,7 @@ term_iterator<T>& term_iterator<T>::operator++()
     }
     else
     {
-      std::shared_ptr<node<T>> child = Path.top();
+      std::shared_ptr<term<T>> child = Path.top();
       Path.pop();
       while(!Path.empty() && Path.top()->right == child)
       {
@@ -133,7 +133,7 @@ term_iterator<T>& term_iterator<T>::operator--()
     }
     else
     {
-      std::shared_ptr<node<T>> child = Path.top();
+      std::shared_ptr<term<T>> child = Path.top();
       Path.pop();
       while(!Path.empty() && Path.top()->left == child)
       {
